@@ -6,3 +6,9 @@ export { default as Intro } from "./Intro";
 export { default as LoginButton } from "./LoginButton";
 export { default as ContentSection } from "./ContentSection";
 export { default as Footer } from "./Footer";
+export { default as Contacts } from "./Contacts";
+export { default as OurTeachers } from "./OurTeachers";
+export { default as PageLoader } from "./PageLoader";
+export { default as Courses } from "./Courses";
+export { default as FeeStructure } from "./FeeStructure";
+

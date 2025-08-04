@@ -27,7 +27,7 @@ const navItems: { label: string; href: string }[] = [
   { label: "Fee Structure", href: "/fee-structure" },
   { label: "Our Teachers", href: "/our-teachers" },
   { label: "Courses", href: "/courses" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contacts", href: "/contacts" },
 ];
 
 export default function Navbar() {
@@ -133,28 +133,42 @@ export default function Navbar() {
 
           {!isMobile && (
             <Box sx={{ display: "flex", gap: 2 }}>
-              {navItems.map(({ label, href }) => (
-                <Link key={label} href={href} passHref legacyBehavior>
-                  <Button
-                    color="inherit"
-                    sx={{
-                      textTransform: "none",
-                      color: "inherit",
-                      fontWeight: 500,
-                      "&:hover": {
-                        color: theme.palette.primary.main,
-                        backgroundColor: "transparent",
-                        transform: "scale(1.05)",
-                      },
-                      "&:active": {
-                        transform: "scale(0.95)",
-                      },
-                    }}
-                  >
-                    {label}
-                  </Button>
-                </Link>
-              ))}
+              {navItems.map(({ label, href }) => {
+                const isActive = router.pathname === href;
+                return (
+                  <Link key={label} href={href} passHref legacyBehavior>
+                    <Button
+                      color="inherit"
+                      sx={{
+                        textTransform: "none",
+                        fontWeight: isActive ? 700 : 500,
+                        fontSize: isActive ? "1.05rem" : "1rem",
+                        color: isActive
+                          ? theme.palette.common.white
+                          : "inherit",
+                        backgroundColor: isActive
+                          ? theme.palette.primary.main
+                          : "transparent",
+                        borderRadius: 1,
+                        px: 2,
+                        py: 1,
+                        "&:hover": {
+                          backgroundColor: isActive
+                            ? theme.palette.primary.dark
+                            : theme.palette.action.hover,
+                          color: theme.palette.primary.main,
+                          transform: "scale(1.05)",
+                        },
+                        "&:active": {
+                          transform: "scale(0.95)",
+                        },
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  </Link>
+                );
+              })}
             </Box>
           )}
 
@@ -181,14 +195,30 @@ export default function Navbar() {
                 <Link href={href} passHref legacyBehavior>
                   <ListItemButton
                     sx={{
-                      color: "inherit",
+                      bgcolor:
+                        router.pathname === href
+                          ? theme.palette.primary.main
+                          : "transparent",
+                      color:
+                        router.pathname === href
+                          ? theme.palette.common.white
+                          : "inherit",
                       "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
+                        backgroundColor:
+                          router.pathname === href
+                            ? theme.palette.primary.dark
+                            : theme.palette.action.hover,
                         color: theme.palette.primary.main,
                       },
                     }}
                   >
-                    <ListItemText primary={label} />
+                    <ListItemText
+                      primary={label}
+                      primaryTypographyProps={{
+                        fontWeight: router.pathname === href ? 700 : 500,
+                        fontSize: router.pathname === href ? "1.05rem" : "1rem",
+                      }}
+                    />
                   </ListItemButton>
                 </Link>
               </ListItem>

@@ -1,15 +1,14 @@
 // pages/fee-structure.tsx
-import FeeStructure from "@/components/FeeStructure";
-
+import OurTeachers from "@/components/OurTeachers";
 import { Box, Typography } from "@mui/material";
 
-export default function FeeStructurePage() {
+export default function OurTeachersPage() {
   return (
     <Box sx={{ px: 2, py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Fee Structure
+        Our Teachers
       </Typography>
-      <FeeStructure />
+      <OurTeachers />
     </Box>
   );
 }

@@ -1,6 +1,6 @@
-import Navbar from "@/components/Navbar";
-import Intro from "@/components/Intro";
-import ContentSection from "@/components/ContentSection";
+import { Navbar } from "@/components";
+import { Intro } from "@/components";
+import { ContentSection } from "@/components";
 import { Footer } from "@/components";
 
 export default function Home() {

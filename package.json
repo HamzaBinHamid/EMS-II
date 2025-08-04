@@ -17,7 +17,7 @@
     "@mui/material": "^7.2.0",
     "@mui/system": "^7.2.0",
     "@supabase/supabase-js": "^2.53.0",
-    "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-query": "^5.84.1",
     "@types/webpack": "^5.28.5",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
