@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "gaklzubhmjnkhkramhkb.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "flowbite.s3.amazonaws.com",
+      },
     ],
   },
   compiler: {

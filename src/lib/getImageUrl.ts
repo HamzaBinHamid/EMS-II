@@ -18,6 +18,7 @@ export const getLogoUrl = (): string => getImageUrl("logo4.png");
 /**
  * Gets the public URL of the Python course image (python.jpeg).
  */
-export const getPythonImageUrl = (): string => getImageUrl("python.jpeg");
-export const getBlockchainImageUrl = (): string => getImageUrl("Blockchain2.jpg");
-export const getWebDevelopmentImageUrl = (): string => getImageUrl("web.png");
+export const carousel1 = (): string => getImageUrl("carousel1.jpg");
+export const carousel2 = (): string => getImageUrl("carousel2.jpg");
+export const carousel4 = (): string => getImageUrl("carousel4.jpg");
+export const carousel5 = (): string => getImageUrl("carousel5.jpg");

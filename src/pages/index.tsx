@@ -1,17 +1,15 @@
-import { Navbar } from "@/components";
-import { Intro } from "@/components";
-import { ContentSection } from "@/components";
-import { Footer } from "@/components";
+import { Box, Container } from "@mui/material";
+import { ImageCarousel, Navbar } from "@/components";
 
 export default function Home() {
   return (
     <>
       <Navbar />
-      <div>
-        <Intro />
-        <ContentSection />
-        <Footer />
-      </div>
+      <Box sx={{ mt: { xs: 8, sm: 10 } }}>
+        <Container maxWidth="lg">
+          <ImageCarousel />
+        </Container>
+      </Box>
     </>
   );
 }
