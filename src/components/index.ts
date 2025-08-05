@@ -11,4 +11,3 @@ export { default as Courses } from "./Courses";
 export { default as FeeStructure } from "./FeeStructure";
 export { default as ImageCarousel } from "./ImageCarousel";
 
-
