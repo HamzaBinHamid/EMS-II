@@ -1,10 +1,11 @@
-// pages/_app.tsx
+// src/pages/_app.tsx
 import "@/styles/globals.css";
 import '@fontsource/plus-jakarta-sans/400.css';
 import '@fontsource/plus-jakarta-sans/600.css';
 import '@fontsource/plus-jakarta-sans/700.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+
 
 import React, { useState, useEffect } from "react";
 import { AppProps } from "next/app";
@@ -36,9 +37,6 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  // Detect if current page is login
-  const isLoginPage = router.pathname === "/login";
-
   useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleStop = () => setLoading(false);
@@ -54,16 +52,14 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     };
   }, [router]);
 
-  const Page = (
-    <Component {...pageProps} />
-  );
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         {loading && <PageLoader />}
-        {isLoginPage ? Page : <Layout>{Page}</Layout>}
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       </ThemeProvider>
     </QueryClientProvider>
   );
