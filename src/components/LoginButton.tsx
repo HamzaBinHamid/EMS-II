@@ -1,7 +1,8 @@
-import { Button, useTheme, Tooltip, ButtonProps } from "@mui/material";
+import { Button, useTheme, Tooltip, ButtonProps, CircularProgress } from "@mui/material";
 import { MdLogin } from "react-icons/md";
 import Head from "next/head";
-import { FC } from "react";
+import { FC, useState } from "react";
+import { useRouter } from "next/router";
 
 interface LoginButtonProps extends ButtonProps {
   /**
@@ -13,6 +14,16 @@ interface LoginButtonProps extends ButtonProps {
 
 const LoginButton: FC<LoginButtonProps> = ({ loginPageUrl = "/login", ...props }) => {
   const theme = useTheme();
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    router.push(loginPageUrl)
+      .then(() => setIsNavigating(false))
+      .catch(() => setIsNavigating(false));
+  };
 
   return (
     <>
@@ -26,11 +37,19 @@ const LoginButton: FC<LoginButtonProps> = ({ loginPageUrl = "/login", ...props }
         <Button
           component="a"
           href={loginPageUrl}
-          startIcon={<MdLogin size={18} aria-hidden="true" />}
+          onClick={handleClick}
+          startIcon={
+            isNavigating ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <MdLogin size={18} aria-hidden="true" />
+            )
+          }
           color="inherit"
           variant="text"
-          aria-label="Log in to your account"
+          aria-label={isNavigating ? "Logging in..." : "Log in to your account"}
           role="button"
+          disabled={isNavigating}
           sx={{
             fontWeight: 600,
             fontSize: { xs: "0.75rem", sm: "0.875rem" },
@@ -54,11 +73,13 @@ const LoginButton: FC<LoginButtonProps> = ({ loginPageUrl = "/login", ...props }
               outline: `2px solid ${theme.palette.secondary.main}`,
               outlineOffset: "2px",
             },
-            ...props.sx, // Merge custom sx props
+            ...props.sx,
           }}
-          {...props} // Spread remaining props
+          {...props}
         >
-          <span itemProp="name">Log in</span>
+          <span itemProp="name">
+            {isNavigating ? "Logging in..." : "Log in"}
+          </span>
         </Button>
       </Tooltip>
     </>

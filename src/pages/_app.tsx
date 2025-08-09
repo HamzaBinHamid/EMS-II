@@ -1,11 +1,11 @@
 // src/pages/_app.tsx
 import "@/styles/globals.css";
-import '@fontsource/plus-jakarta-sans/400.css';
-import '@fontsource/plus-jakarta-sans/600.css';
-import '@fontsource/plus-jakarta-sans/700.css';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-
+import "@fontsource/plus-jakarta-sans/400.css";
+import "@fontsource/plus-jakarta-sans/600.css";
+import "@fontsource/plus-jakarta-sans/700.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 import React, { useState, useEffect } from "react";
 import { AppProps } from "next/app";
@@ -55,11 +55,13 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {loading && <PageLoader />}
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <AuthProvider>
+          <CssBaseline />
+          {loading && <PageLoader />}
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
