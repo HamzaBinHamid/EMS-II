@@ -1,27 +1,52 @@
-// src/components/ProtectedRoute.tsx
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
-import { ReactNode, useEffect } from 'react';
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+import { useAuth } from "@/context/AuthContext";
+import { CircularProgress, Box } from "@mui/material";
 
-interface Props {
-  children: ReactNode;
+interface ProtectedRouteProps {
   allowedRoles?: string[];
+  children: React.ReactNode;
 }
 
-export default function ProtectedRoute({ children, allowedRoles }: Props) {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  allowedRoles = [],
+  children,
+}) => {
   const { user, role, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.push('/login');
-      } else if (allowedRoles && !allowedRoles.includes(role ?? '')) {
-        router.push('/unauthorized');
+        router.replace("/login");
+      } else if (
+        allowedRoles.length > 0 &&
+        role &&
+        !allowedRoles.includes(role)
+      ) {
+        router.replace("/unauthorized"); // or your custom unauthorized page
       }
     }
-  }, [user, role, loading, router, allowedRoles]);
+  }, [user, role, loading, allowedRoles, router]);
 
-  if (loading) return <p>Loading...</p>;
+  if (
+    loading ||
+    !user ||
+    (allowedRoles.length > 0 && role && !allowedRoles.includes(role))
+  ) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return <>{children}</>;
-}
+};
+
+export default ProtectedRoute;

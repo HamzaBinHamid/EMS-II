@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
-import { useRouter } from "next/router"; // ✅ NEW
+import { useRouter } from "next/router";
 import {
   AppBar,
   Toolbar,
@@ -21,6 +21,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { getLogoUrl } from "@/lib/getImageUrl";
 import LoginButton from "@/components/LoginButton";
+import LogoutButton from "@/components/LogoutButton";
+import { useAuth } from "@/context/AuthContext";
 
 const navItems: { label: string; href: string }[] = [
   { label: "Home", href: "/" },
@@ -35,10 +37,10 @@ export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const logoUrl = getLogoUrl();
+  const router = useRouter();
 
-  const router = useRouter(); // ✅ NEW
+  const { user } = useAuth();
 
-  // ✅ Close drawer on route change
   useEffect(() => {
     const handleRouteChange = () => {
       setMobileMenuOpen(false);
@@ -82,12 +84,7 @@ export default function Navbar() {
       </Head>
 
       {/* Navbar */}
-      <AppBar
-        position="fixed"
-        color="default"
-        elevation={0}
-        sx={{ width: "100%", top: 0, left: 0 }}
-      >
+      <AppBar position="fixed" color="default" elevation={0} sx={{ width: "100%", top: 0, left: 0 }}>
         <Toolbar>
           {isMobile && (
             <IconButton
@@ -101,7 +98,7 @@ export default function Navbar() {
             </IconButton>
           )}
 
-          {/* Logo (centered on small screens) */}
+          {/* Logo */}
           <Box
             sx={{
               flexGrow: 1,
@@ -143,19 +140,13 @@ export default function Navbar() {
                         textTransform: "none",
                         fontWeight: isActive ? 700 : 500,
                         fontSize: isActive ? "1.05rem" : "1rem",
-                        color: isActive
-                          ? theme.palette.common.white
-                          : "inherit",
-                        backgroundColor: isActive
-                          ? theme.palette.primary.main
-                          : "transparent",
+                        color: isActive ? theme.palette.common.white : "inherit",
+                        backgroundColor: isActive ? theme.palette.primary.main : "transparent",
                         borderRadius: 1,
                         px: 2,
                         py: 1,
                         "&:hover": {
-                          backgroundColor: isActive
-                            ? theme.palette.primary.dark
-                            : theme.palette.action.hover,
+                          backgroundColor: isActive ? theme.palette.primary.dark : theme.palette.action.hover,
                           color: theme.palette.primary.main,
                           transform: "scale(1.05)",
                         },
@@ -172,16 +163,22 @@ export default function Navbar() {
             </Box>
           )}
 
-          <LoginButton />
+          {/* User email & logout if logged in, else login button */}
+          <Box sx={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 2 }}>
+            {user ? (
+              <>
+                <span style={{ fontWeight: 600 }}>{user.email}</span>
+                <LogoutButton />
+              </>
+            ) : (
+              <LoginButton />
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
 
       {/* Mobile Drawer */}
-      <Drawer
-        anchor="left"
-        open={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-      >
+      <Drawer anchor="left" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
         <Box sx={{ width: 250, p: 2 }}>
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <IconButton onClick={() => setMobileMenuOpen(false)}>
@@ -195,19 +192,10 @@ export default function Navbar() {
                 <Link href={href} passHref legacyBehavior>
                   <ListItemButton
                     sx={{
-                      bgcolor:
-                        router.pathname === href
-                          ? theme.palette.primary.main
-                          : "transparent",
-                      color:
-                        router.pathname === href
-                          ? theme.palette.common.white
-                          : "inherit",
+                      bgcolor: router.pathname === href ? theme.palette.primary.main : "transparent",
+                      color: router.pathname === href ? theme.palette.common.white : "inherit",
                       "&:hover": {
-                        backgroundColor:
-                          router.pathname === href
-                            ? theme.palette.primary.dark
-                            : theme.palette.action.hover,
+                        backgroundColor: router.pathname === href ? theme.palette.primary.dark : theme.palette.action.hover,
                         color: theme.palette.primary.main,
                       },
                     }}
@@ -225,24 +213,26 @@ export default function Navbar() {
             ))}
           </List>
 
-          <Button
-            fullWidth
-            color="inherit"
-            sx={{
-              mt: 1,
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                backgroundColor: theme.palette.action.hover,
-                color: theme.palette.primary.main,
-                transform: "scale(1.02)",
-              },
-              "&:active": {
-                transform: "scale(0.98)",
-              },
-            }}
-          >
-            Log in
-          </Button>
+          {!user && (
+            <Button
+              fullWidth
+              color="inherit"
+              sx={{
+                mt: 1,
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                  color: theme.palette.primary.main,
+                  transform: "scale(1.02)",
+                },
+                "&:active": {
+                  transform: "scale(0.98)",
+                },
+              }}
+            >
+              Log in
+            </Button>
+          )}
         </Box>
       </Drawer>
     </>

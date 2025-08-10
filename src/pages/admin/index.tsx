@@ -1,12 +1,23 @@
-import { useAuth } from '@/context/AuthContext';
+import React from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PortalHeader from "@/components/PortalHeader";
+import { Box, Paper, Typography } from "@mui/material";
+import { useAuth } from "@/context/AuthContext";
 
-export default function AdminPage() {
-  const { user, signOut } = useAuth();
+export default function AdminPortalPage() {
+  const { user } = useAuth();
+
   return (
-    <div>
-      <h1>Welcome Admin</h1>
-      <p>{user?.email}</p>
-      <button onClick={signOut}>Sign out</button>
-    </div>
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <Box sx={{ p: 3 }}>
+        <PortalHeader title="Admin Dashboard" />
+        <Paper sx={{ p: 4 }}>
+          <Typography variant="h4" gutterBottom>
+            Welcome, {user?.email}
+          </Typography>
+          <Typography>This is your admin dashboard.</Typography>
+        </Paper>
+      </Box>
+    </ProtectedRoute>
   );
 }

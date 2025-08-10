@@ -1,4 +1,3 @@
-// src/pages/_app.tsx
 import "@/styles/globals.css";
 import "@fontsource/plus-jakarta-sans/400.css";
 import "@fontsource/plus-jakarta-sans/600.css";
@@ -19,6 +18,14 @@ import { useRouter } from "next/router";
 import theme from "@/ui/theme";
 import { Layout } from "@/components";
 import PageLoader from "@/components/PageLoader";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+type CustomAppProps = AppProps & {
+  Component: AppProps['Component'] & {
+    noLayout?: boolean;
+  }
+};
 
 const config: QueryClientConfig = {
   defaultOptions: {
@@ -31,15 +38,22 @@ const config: QueryClientConfig = {
   },
 };
 
-const queryClient = new QueryClient(config);
-
-export default function MyApp({ Component, pageProps }: AppProps) {
+export default function MyApp({ Component, pageProps }: CustomAppProps) {
+  const [queryClient] = useState(() => new QueryClient(config));
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
 
   useEffect(() => {
-    const handleStart = () => setLoading(true);
-    const handleStop = () => setLoading(false);
+    let timeout: NodeJS.Timeout;
+    
+    const handleStart = () => {
+      timeout = setTimeout(() => setShowLoader(true), 100);
+    };
+    
+    const handleStop = () => {
+      clearTimeout(timeout);
+      setShowLoader(false);
+    };
 
     router.events.on("routeChangeStart", handleStart);
     router.events.on("routeChangeComplete", handleStop);
@@ -52,15 +66,29 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     };
   }, [router]);
 
+  const getLayout = Component.noLayout 
+    ? (page: React.ReactNode) => page
+    : (page: React.ReactNode) => <Layout>{page}</Layout>;
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <AuthProvider>
           <CssBaseline />
-          {loading && <PageLoader />}
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          {showLoader && <PageLoader />}
+          {getLayout(<Component {...pageProps} />)}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
