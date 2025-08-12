@@ -1,3 +1,5 @@
+//src/pages/index.tsx
+
 import { Box, Container } from "@mui/material";
 import { ImageCarousel, Navbar, PageLoader } from "@/components";
 import { useEffect, useState } from "react";

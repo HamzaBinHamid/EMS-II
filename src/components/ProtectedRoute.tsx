@@ -1,52 +1,26 @@
-import React, { useEffect } from "react";
-import { useRouter } from "next/router";
+// src/components/ProtectedRoute.tsx
+import { ReactNode, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { CircularProgress, Box } from "@mui/material";
+import { useRouter } from "next/router";
 
 interface ProtectedRouteProps {
-  allowedRoles?: string[];
-  children: React.ReactNode;
+  children: ReactNode;
+  allowedRoles: string[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  allowedRoles = [],
-  children,
-}) => {
+export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, role, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        router.replace("/login");
-      } else if (
-        allowedRoles.length > 0 &&
-        role &&
-        !allowedRoles.includes(role)
-      ) {
-        router.replace("/unauthorized"); // or your custom unauthorized page
+      if (!user || !allowedRoles.includes(role || "")) {
+        router.push("/login");
       }
     }
-  }, [user, role, loading, allowedRoles, router]);
+  }, [loading, user, role, router, allowedRoles]);
 
-  if (
-    loading ||
-    !user ||
-    (allowedRoles.length > 0 && role && !allowedRoles.includes(role))
-  ) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
+  if (loading) return <p>Loading...</p>;
 
   return <>{children}</>;
-};
-
-export default ProtectedRoute;
+}

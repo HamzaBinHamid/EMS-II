@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// src/components/Navbar.tsx
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
@@ -37,10 +38,11 @@ export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const logoUrl = getLogoUrl();
-  const router = useRouter();
 
+  const router = useRouter();
   const { user } = useAuth();
 
+  // Close drawer on route change
   useEffect(() => {
     const handleRouteChange = () => {
       setMobileMenuOpen(false);
@@ -84,7 +86,12 @@ export default function Navbar() {
       </Head>
 
       {/* Navbar */}
-      <AppBar position="fixed" color="default" elevation={0} sx={{ width: "100%", top: 0, left: 0 }}>
+      <AppBar
+        position="fixed"
+        color="default"
+        elevation={0}
+        sx={{ width: "100%", top: 0, left: 0 }}
+      >
         <Toolbar>
           {isMobile && (
             <IconButton
@@ -128,6 +135,7 @@ export default function Navbar() {
             </Link>
           </Box>
 
+          {/* Desktop Navigation */}
           {!isMobile && (
             <Box sx={{ display: "flex", gap: 2 }}>
               {navItems.map(({ label, href }) => {
@@ -140,13 +148,19 @@ export default function Navbar() {
                         textTransform: "none",
                         fontWeight: isActive ? 700 : 500,
                         fontSize: isActive ? "1.05rem" : "1rem",
-                        color: isActive ? theme.palette.common.white : "inherit",
-                        backgroundColor: isActive ? theme.palette.primary.main : "transparent",
+                        color: isActive
+                          ? theme.palette.common.white
+                          : "inherit",
+                        backgroundColor: isActive
+                          ? theme.palette.primary.main
+                          : "transparent",
                         borderRadius: 1,
                         px: 2,
                         py: 1,
                         "&:hover": {
-                          backgroundColor: isActive ? theme.palette.primary.dark : theme.palette.action.hover,
+                          backgroundColor: isActive
+                            ? theme.palette.primary.dark
+                            : theme.palette.action.hover,
                           color: theme.palette.primary.main,
                           transform: "scale(1.05)",
                         },
@@ -163,22 +177,32 @@ export default function Navbar() {
             </Box>
           )}
 
-          {/* User email & logout if logged in, else login button */}
-          <Box sx={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 2 }}>
-            {user ? (
-              <>
-                <span style={{ fontWeight: 600 }}>{user.email}</span>
-                <LogoutButton />
-              </>
-            ) : (
-              <LoginButton />
-            )}
-          </Box>
+          {/* Right Side - Auth Buttons */}
+          {user ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, ml: 2 }}>
+              <Box
+                sx={{
+                  fontWeight: 500,
+                  fontSize: "0.95rem",
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                {user.email}
+              </Box>
+              <LogoutButton />
+            </Box>
+          ) : (
+            <LoginButton />
+          )}
         </Toolbar>
       </AppBar>
 
       {/* Mobile Drawer */}
-      <Drawer anchor="left" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      >
         <Box sx={{ width: 250, p: 2 }}>
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <IconButton onClick={() => setMobileMenuOpen(false)}>
@@ -192,10 +216,19 @@ export default function Navbar() {
                 <Link href={href} passHref legacyBehavior>
                   <ListItemButton
                     sx={{
-                      bgcolor: router.pathname === href ? theme.palette.primary.main : "transparent",
-                      color: router.pathname === href ? theme.palette.common.white : "inherit",
+                      bgcolor:
+                        router.pathname === href
+                          ? theme.palette.primary.main
+                          : "transparent",
+                      color:
+                        router.pathname === href
+                          ? theme.palette.common.white
+                          : "inherit",
                       "&:hover": {
-                        backgroundColor: router.pathname === href ? theme.palette.primary.dark : theme.palette.action.hover,
+                        backgroundColor:
+                          router.pathname === href
+                            ? theme.palette.primary.dark
+                            : theme.palette.action.hover,
                         color: theme.palette.primary.main,
                       },
                     }}
@@ -213,7 +246,10 @@ export default function Navbar() {
             ))}
           </List>
 
-          {!user && (
+          {/* Mobile Auth Button */}
+          {user ? (
+            <LogoutButton />
+          ) : (
             <Button
               fullWidth
               color="inherit"
@@ -225,10 +261,9 @@ export default function Navbar() {
                   color: theme.palette.primary.main,
                   transform: "scale(1.02)",
                 },
-                "&:active": {
-                  transform: "scale(0.98)",
-                },
+                "&:active": { transform: "scale(0.98)" },
               }}
+              onClick={() => router.push("/login")}
             >
               Log in
             </Button>

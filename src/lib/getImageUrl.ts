@@ -1,6 +1,6 @@
 // src/lib/getImageUrl.ts
 
-import { supabase } from "@/lib/supabaseClient";
+import supabase from "@/lib/supabase";
 
 /**
  * Fetches a public URL for a file stored in the "images" bucket in Supabase Storage.

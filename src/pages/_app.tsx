@@ -1,10 +1,10 @@
+// src/pages/_app.tsx
 import "@/styles/globals.css";
-import "@fontsource/plus-jakarta-sans/400.css";
-import "@fontsource/plus-jakarta-sans/600.css";
-import "@fontsource/plus-jakarta-sans/700.css";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import { AuthProvider } from "@/context/AuthContext";
+import '@fontsource/plus-jakarta-sans/400.css';
+import '@fontsource/plus-jakarta-sans/600.css';
+import '@fontsource/plus-jakarta-sans/700.css';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 import React, { useState, useEffect } from "react";
 import { AppProps } from "next/app";
@@ -18,14 +18,11 @@ import { useRouter } from "next/router";
 import theme from "@/ui/theme";
 import { Layout } from "@/components";
 import PageLoader from "@/components/PageLoader";
+import { AuthProvider } from "@/context/AuthContext";
+
+// ✅ Toastify imports
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-type CustomAppProps = AppProps & {
-  Component: AppProps['Component'] & {
-    noLayout?: boolean;
-  }
-};
 
 const config: QueryClientConfig = {
   defaultOptions: {
@@ -38,22 +35,15 @@ const config: QueryClientConfig = {
   },
 };
 
-export default function MyApp({ Component, pageProps }: CustomAppProps) {
-  const [queryClient] = useState(() => new QueryClient(config));
+const queryClient = new QueryClient(config);
+
+export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const [showLoader, setShowLoader] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    
-    const handleStart = () => {
-      timeout = setTimeout(() => setShowLoader(true), 100);
-    };
-    
-    const handleStop = () => {
-      clearTimeout(timeout);
-      setShowLoader(false);
-    };
+    const handleStart = () => setLoading(true);
+    const handleStop = () => setLoading(false);
 
     router.events.on("routeChangeStart", handleStart);
     router.events.on("routeChangeComplete", handleStop);
@@ -66,29 +56,30 @@ export default function MyApp({ Component, pageProps }: CustomAppProps) {
     };
   }, [router]);
 
-  const getLayout = Component.noLayout 
-    ? (page: React.ReactNode) => page
-    : (page: React.ReactNode) => <Layout>{page}</Layout>;
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {loading && <PageLoader />}
+
+        {/* ✅ Wrap with AuthProvider */}
         <AuthProvider>
-          <CssBaseline />
-          {showLoader && <PageLoader />}
-          {getLayout(<Component {...pageProps} />)}
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
+          <Layout>
+            <Component {...pageProps} />
+            {/* ✅ Toast container here so it's available globally */}
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
+          </Layout>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

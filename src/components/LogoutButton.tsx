@@ -1,20 +1,32 @@
-import React from "react";
-import { Button, CircularProgress } from "@mui/material";
-import { useAuth } from "@/context/AuthContext";
+import { Button } from "@mui/material";
+import supabase from "@/lib/supabase";
+import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 
-const LogoutButton = () => {
-  const { logout, loading } = useAuth();
+export default function LogoutButton() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Error logging out.");
+      console.error(error);
+    } else {
+      toast.success("Logged out successfully.");
+      router.push("/login");
+    }
+  };
 
   return (
     <Button
       color="inherit"
-      onClick={logout}
-      disabled={loading}
-      startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
+      onClick={handleLogout}
+      sx={{
+        textTransform: "none",
+        "&:hover": { backgroundColor: "action.hover" },
+      }}
     >
       Logout
     </Button>
   );
-};
-
-export default LogoutButton;
+}
