@@ -1,17 +1,16 @@
-// pages/login.tsx
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import supabase from "@/lib/supabase";
 import roleRedirect from "@/utils/roleRedirect";
-import { TextField, Button, Box, Typography } from "@mui/material";
+import { TextField, Box, Typography } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
-import "react-toastify/dist/ReactToastify.css";
+import CustomButton from "@/components/CustomButton";
+import ToastNotification from "@/components/ToastNotification";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const router = useRouter();
   const { user, role, loading: authLoading } = useAuth();
 
@@ -24,7 +23,6 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     const { error: authError } = await supabase.auth.signInWithPassword({
@@ -33,9 +31,8 @@ export default function LoginPage() {
     });
 
     if (authError) {
-      setError(authError.message);
       setLoading(false);
-      return;
+      return <ToastNotification message={authError.message} type="error" />;
     }
 
     // Fetch role + active from portal_users
@@ -46,22 +43,20 @@ export default function LoginPage() {
       .single();
 
     if (profileError || !profile) {
-      setError("User record not found.");
       setLoading(false);
-      return;
+      return <ToastNotification message="User record not found." type="error" />;
     }
 
     if (!profile.active) {
-      setError("Your account is inactive. Contact admin.");
       setLoading(false);
-      return;
+      return <ToastNotification message="Your account is inactive. Contact admin." type="error" />;
     }
 
     roleRedirect(profile.role, router);
     setLoading(false);
   };
 
-  if (authLoading) return <p>Loading...</p>;
+  if (authLoading) return <Typography>Loading...</Typography>;
 
   return (
     <Box sx={{ maxWidth: 400, mx: "auto", mt: 10 }}>
@@ -87,12 +82,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && (
-          <Typography color="error" mt={1}>
-            {error}
-          </Typography>
-        )}
-        <Button
+        <CustomButton
           type="submit"
           variant="contained"
           color="primary"
@@ -101,7 +91,7 @@ export default function LoginPage() {
           sx={{ mt: 2 }}
         >
           {loading ? "Logging in..." : "Login"}
-        </Button>
+        </CustomButton>
       </form>
     </Box>
   );

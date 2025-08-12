@@ -19,8 +19,6 @@ import theme from "@/ui/theme";
 import { Layout } from "@/components";
 import PageLoader from "@/components/PageLoader";
 import { AuthProvider } from "@/context/AuthContext";
-
-// ✅ Toastify imports
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -61,12 +59,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         {loading && <PageLoader />}
-
-        {/* ✅ Wrap with AuthProvider */}
         <AuthProvider>
           <Layout>
             <Component {...pageProps} />
-            {/* ✅ Toast container here so it's available globally */}
             <ToastContainer
               position="top-right"
               autoClose={3000}
@@ -78,6 +73,12 @@ export default function MyApp({ Component, pageProps }: AppProps) {
               draggable
               pauseOnHover
               theme="colored"
+              toastStyle={{
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+                borderRadius: theme.shape.borderRadius,
+                boxShadow: theme.shadows[4],
+              }}
             />
           </Layout>
         </AuthProvider>

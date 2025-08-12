@@ -1,8 +1,8 @@
-//src/components/LoginButton.tsx
-import { Button, useTheme, Tooltip, ButtonProps } from "@mui/material";
+import { useTheme, Tooltip, ButtonProps } from "@mui/material";
 import { MdLogin } from "react-icons/md";
 import Head from "next/head";
 import { FC } from "react";
+import CustomButton from "@/components/CustomButton";
 
 interface LoginButtonProps extends ButtonProps {
   /**
@@ -24,27 +24,20 @@ const LoginButton: FC<LoginButtonProps> = ({ loginPageUrl = "/login", ...props }
       </Head>
 
       <Tooltip title="Access your dashboard" arrow enterDelay={500}>
-        <Button
+        <CustomButton
           component="a"
           href={loginPageUrl}
           startIcon={<MdLogin size={18} aria-hidden="true" />}
-          color="inherit"
           variant="text"
           aria-label="Log in to your account"
           role="button"
           sx={{
-            fontWeight: 600,
             fontSize: { xs: "0.75rem", sm: "0.875rem" },
             padding: { xs: "2px 6px", sm: "3px 8px" },
-            transition: theme.transitions.create(
-              ["background-color", "color"],
-              { duration: 300 }
-            ),
             color: theme.palette.common.white,
             "&:hover": {
-              backgroundColor: theme.palette.mode === 'dark' 
-                ? theme.palette.primary.light 
-                : theme.palette.primary.dark,
+              backgroundColor: theme.palette.primary.main, // #1E88E5
+              color: theme.palette.primary.contrastText,
               "& svg": {
                 color: theme.palette.primary.contrastText,
               },
@@ -60,7 +53,7 @@ const LoginButton: FC<LoginButtonProps> = ({ loginPageUrl = "/login", ...props }
           {...props} // Spread remaining props
         >
           <span itemProp="name">Log in</span>
-        </Button>
+        </CustomButton>
       </Tooltip>
     </>
   );
