@@ -5,7 +5,7 @@ import roleRedirect from "@/utils/roleRedirect";
 import { TextField, Box, Typography } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
 import CustomButton from "@/components/CustomButton";
-import ToastNotification from "@/components/ToastNotification";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -32,7 +32,16 @@ export default function LoginPage() {
 
     if (authError) {
       setLoading(false);
-      return <ToastNotification message={authError.message} type="error" />;
+      toast.error(authError.message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+      return;
     }
 
     // Fetch role + active from portal_users
@@ -44,12 +53,30 @@ export default function LoginPage() {
 
     if (profileError || !profile) {
       setLoading(false);
-      return <ToastNotification message="User record not found." type="error" />;
+      toast.error("User record not found.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+      return;
     }
 
     if (!profile.active) {
       setLoading(false);
-      return <ToastNotification message="Your account is inactive. Contact admin." type="error" />;
+      toast.error("Your account is inactive. Contact admin.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+      return;
     }
 
     roleRedirect(profile.role, router);
