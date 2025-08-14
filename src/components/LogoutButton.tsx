@@ -42,7 +42,7 @@ export default function LogoutButton() {
         },
       }}
     >
-      <LogoutIcon />
+      <LogoutIcon sx={{ color: theme.palette.common.white }} />{" "}
     </IconButton>
   ) : (
     <CustomButton
