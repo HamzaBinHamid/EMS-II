@@ -1,4 +1,3 @@
-// src/components/Navbar.tsx
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,7 +37,6 @@ export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const logoUrl = getLogoUrl();
-
   const router = useRouter();
   const { user } = useAuth();
 
@@ -114,25 +112,27 @@ export default function Navbar() {
               justifyContent: isMobile ? "center" : "flex-start",
             }}
           >
-            <Link href="/" style={{ textDecoration: "none" }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  transition: "transform 0.2s ease-in-out",
-                  cursor: "pointer",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                    color: theme.palette.primary.main,
-                  },
-                  "&:active": {
-                    transform: "scale(0.98)",
-                  },
-                }}
-              >
-                <Image src={logoUrl} alt="Logo" width={120} height={60} />
-              </Box>
-            </Link>
+            {(!isMobile || !user) && (
+              <Link href="/" style={{ textDecoration: "none" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    transition: "transform 0.2s ease-in-out",
+                    cursor: "pointer",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      color: theme.palette.primary.main,
+                    },
+                    "&:active": {
+                      transform: "scale(0.98)",
+                    },
+                  }}
+                >
+                  <Image src={logoUrl} alt="Logo" width={120} height={60} />
+                </Box>
+              </Link>
+            )}
           </Box>
 
           {/* Desktop Navigation */}
@@ -184,7 +184,7 @@ export default function Navbar() {
                 sx={{
                   fontWeight: 500,
                   fontSize: "0.95rem",
-                  color: theme.palette.text.secondary,
+                  color: theme.palette.mode,
                 }}
               >
                 {user.email}
