@@ -1,6 +1,5 @@
-import supabase from "@/lib/supabase";
 import { useRouter } from "next/router";
-import ToastNotification from "@/components/ToastNotification";
+import supabase from "@/lib/supabase";
 import CustomButton from "@/components/CustomButton";
 
 export default function LogoutButton() {
@@ -13,17 +12,24 @@ export default function LogoutButton() {
         if (process.env.NODE_ENV !== "production") {
           console.error("Logout error:", error);
         }
-        return <ToastNotification message="Failed to log out. Please try again." type="error" />;
+        return;
       }
       router.push("/login");
-      return <ToastNotification message="Successfully logged out." type="success" />;
     } catch (err) {
       if (process.env.NODE_ENV !== "production") {
         console.error("Unexpected logout error:", err);
       }
-      return <ToastNotification message="An unexpected error occurred during logout." type="error" />;
     }
   };
 
-  return <CustomButton onClick={handleLogout}>Logout</CustomButton>;
+  return (
+    <CustomButton
+      onClick={handleLogout}
+      variant="contained"
+      color="primary"
+      aria-label="Log out of your account"
+    >
+      Logout
+    </CustomButton>
+  );
 }

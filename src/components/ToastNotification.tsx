@@ -3,9 +3,10 @@ import { toast } from "react-toastify";
 interface ToastNotificationProps {
   message: string;
   type?: "success" | "error" | "info" | "warning";
+  id?: string;
 }
 
-const ToastNotification = ({ message, type = "info" }: ToastNotificationProps) => {
+const ToastNotification = ({ message, type = "info", id }: ToastNotificationProps) => {
   const toastOptions = {
     position: "top-right" as const,
     autoClose: 3000,
@@ -14,6 +15,7 @@ const ToastNotification = ({ message, type = "info" }: ToastNotificationProps) =
     pauseOnHover: true,
     draggable: true,
     theme: "colored" as const,
+    toastId: id,
   };
 
   switch (type) {
@@ -32,7 +34,7 @@ const ToastNotification = ({ message, type = "info" }: ToastNotificationProps) =
       break;
   }
 
-  return null; // Component doesn't render anything
+  return null;
 };
 
 export default ToastNotification;
