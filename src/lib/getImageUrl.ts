@@ -22,3 +22,4 @@ export const carousel1 = (): string => getImageUrl("carousel1.jpg");
 export const carousel2 = (): string => getImageUrl("carousel2.jpg");
 export const carousel4 = (): string => getImageUrl("carousel4.jpg");
 export const carousel5 = (): string => getImageUrl("carousel5.jpg");
+export const fee = (): string => getImageUrl("fee.png");

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { ImageCarousel, Navbar, PageLoader } from "@/components";
 import { carousel1, carousel2, carousel4, carousel5 } from "@/lib/getImageUrl";
+import BlogCardList from "@/components/BlogCardList";
 
 const fetchInitialData = async () => {
   // Simulate fetching initial data (replace with actual API call)
@@ -61,6 +62,7 @@ const Home = memo(() => {
         }}
       >
         <Container maxWidth={isLg ? "lg" : isMd ? "md" : isSm ? "sm" : "xs"}>
+          <BlogCardList />
           <ImageCarousel />
         </Container>
       </Box>
