@@ -17,6 +17,14 @@ interface AuthContextType {
   loading: boolean;
 }
 
+// Define all routes that should be accessible without login
+const PUBLIC_PATHS = [
+  "/", 
+  "/login", 
+  "/features/FeePage" // Add more public routes here
+];
+
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Inactivity timeout duration (e.g., 15 minutes)
@@ -69,15 +77,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               theme: "colored",
             });
           } else {
-            toast.info("Session expired due to inactivity. Please log in again.", {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              theme: "colored",
-            });
+            toast.info(
+              "Session expired due to inactivity. Please log in again.",
+              {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "colored",
+              }
+            );
             if (router.pathname !== "/login") {
               router.push("/login");
             }
@@ -109,15 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
             setRole(null);
             setName(null);
-            if (router.pathname !== "/login" && router.pathname !== "/") {
+            if (!PUBLIC_PATHS.includes(router.pathname)) {
               toast.error("User record not found.", {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "colored",
+                /* toast options */
               });
               router.push("/login");
             }
@@ -128,15 +133,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
             setRole(null);
             setName(null);
-            if (router.pathname !== "/login" && router.pathname !== "/") {
+            if (!PUBLIC_PATHS.includes(router.pathname)) {
               toast.error("Your account is inactive. Contact admin.", {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "colored",
+                /* toast options */
               });
               router.push("/login");
             }
@@ -152,26 +151,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
           setRole(null);
           setName(null);
-          if (router.pathname !== "/login" && router.pathname !== "/") {
+          if (!PUBLIC_PATHS.includes(router.pathname)) {
             router.push("/login");
           }
         }
       } catch (err) {
-        if (process.env.NODE_ENV !== "production") {
-          console.error("Error in getUser:", err);
-        }
+        console.error("Error in getUser:", err);
         setUser(null);
         setRole(null);
         setName(null);
-        if (router.pathname !== "/login" && router.pathname !== "/") {
+        if (!PUBLIC_PATHS.includes(router.pathname)) {
           toast.error("Error fetching user data.", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "colored",
+            /* toast options */
           });
           router.push("/login");
         }
@@ -193,7 +184,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authListener?.subscription?.unsubscribe();
     };
   }, [router]);
-
   return (
     <AuthContext.Provider value={{ user, role, name, loading }}>
       {children}

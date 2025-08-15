@@ -24,21 +24,39 @@ import LoginButton from "@/components/LoginButton";
 import LogoutButton from "@/components/LogoutButton";
 import { useAuth } from "@/context/AuthContext";
 
-const navItems: { label: string; href: string }[] = [
-  { label: "Home", href: "/" },
-  { label: "Fee Structure", href: "/fee-structure" },
-  { label: "Our Teachers", href: "/our-teachers" },
-  { label: "Courses", href: "/courses" },
-  { label: "Contacts", href: "/contacts" },
-];
-
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const logoUrl = getLogoUrl();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+
+  // Role-based portal path
+  const getPortalPath = () => {
+    if (!user) return "/login"; // Not logged in
+    switch (role) {
+      case "admin":
+        return "/portal/admin";
+      case "teacher":
+        return "/portal/teacher";
+      case "student":
+        return "/portal/student";
+      case "parent":
+        return "/portal/parent";
+      default:
+        return "/login"; // Fallback
+    }
+  };
+
+  const navItems: { label: string; href: string }[] = [
+    { label: "Home", href: "/" },
+    { label: "Fee Structure", href: "/features/FeePage" },
+    { label: "Our Teachers", href: "/our-teachers" },
+    { label: "Courses", href: "/courses" },
+    { label: "Contacts", href: "/contacts" },
+    { label: "Portal", href: getPortalPath() }, // New dynamic portal link
+  ];
 
   // Close drawer on route change
   useEffect(() => {

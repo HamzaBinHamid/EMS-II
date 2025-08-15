@@ -206,8 +206,8 @@ const LoginPage = memo(() => {
                 {...register("password", {
                   required: "Password is required",
                   minLength: {
-                    value: 6,
-                    message: "Password must be at least 6 characters",
+                    value: 9,
+                    message: "Password must be at least 9 characters",
                   },
                 })}
                 error={!!errors.password}
