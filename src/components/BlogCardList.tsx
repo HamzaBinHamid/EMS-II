@@ -10,7 +10,7 @@ interface CardData {
 
 const BlogCardList: React.FC = () => {
   const cards: CardData[] = [
-    { imageFileName: "fee.png", buttonText: "Learn More", navigateTo: "/features/FeePage" },
+    { imageFileName: "fee.png", buttonText: "Fee Structure", navigateTo: "/features/FeePage" },
     { imageFileName: "fee.png", buttonText: "Explore Now", navigateTo: "/features/ExplorePage" },
     { imageFileName: "fee.png", buttonText: "See Details", navigateTo: "/features/DetailsPage" },
     { imageFileName: "fee.png", buttonText: "View Info", navigateTo: "/features/InfoPage" },
@@ -48,9 +48,6 @@ const BlogCardList: React.FC = () => {
           imageFileName={card.imageFileName}
           buttonText={card.buttonText}
           navigateTo={card.navigateTo} // 👈 Pass dynamic route
-          onReadMore={() =>
-            console.log(`${card.buttonText} clicked on card ${index + 1}`)
-          }
         />
       ))}
     </Box>
