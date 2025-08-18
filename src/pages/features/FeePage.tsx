@@ -1,36 +1,36 @@
 import React, { useState } from "react";
 import { Box, Typography, Button } from "@mui/material";
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
-import { fetchInstitutes } from "@/lib/supabase/queries";
+import { fetchInstitutes, fetchFeeStructures } from "@/lib/supabase/queries";
 import InstituteCard from "@/components/InstituteCard";
+import FeeStructureModal from "@/components/FeeStructureModal";
 import PageLoader from "@/components/PageLoader";
-import InstituteModal from "@/components/InstituteModal";
 import type { Institute } from "@/types/institute";
+import BackToHomeButton from "@/components/BackToHomeButton";
+import type { FeeStructure } from "@/types/feeStructure";
 
 const FeePage: React.FC = () => {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [selectedInstitute, setSelectedInstitute] = useState<Institute | null>(null);
+  const [openFeeModal, setOpenFeeModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const handleOpen = (institute: Institute) => {
-    setSelectedInstitute(institute);
-    setOpen(true);
+  const handleOpenFeeModal = (category: string) => {
+    setSelectedCategory(category);
+    setOpenFeeModal(true);
   };
 
-  const handleClose = () => {
-    setSelectedInstitute(null);
-    setOpen(false);
+  const handleCloseFeeModal = () => {
+    setSelectedCategory(null);
+    setOpenFeeModal(false);
   };
 
+  // Query for institutes
   const {
     data: institutes,
-    isLoading,
-    error,
-    isError,
-    isSuccess,
-    refetch,
+    isLoading: isLoadingInstitutes,
+    error: institutesError,
+    isError: isInstitutesError,
+    isSuccess: isInstitutesSuccess,
+    refetch: refetchInstitutes,
   } = useQuery<Institute[], Error>({
     queryKey: ["institutes"],
     queryFn: fetchInstitutes,
@@ -40,44 +40,67 @@ const FeePage: React.FC = () => {
     retryDelay: 1000,
   });
 
+  // Query for fee_structure
+  const {
+    data: feeStructures,
+    isLoading: isLoadingFeeStructures,
+    error: feeStructuresError,
+    isError: isFeeStructuresError,
+    refetch: refetchFeeStructures,
+  } = useQuery<FeeStructure[], Error>({
+    queryKey: ["fee_structures"],
+    queryFn: fetchFeeStructures,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 2,
+    retryDelay: 1000,
+  });
+
+  // Filter fee structures by selected category
+  const filteredFeeStructures =
+    selectedCategory && feeStructures
+      ? feeStructures.filter((fs) => fs.institute_category === selectedCategory)
+      : [];
+
   return (
     <Box sx={{ maxWidth: "1000px", margin: "auto", padding: { xs: 2, sm: 4 } }}>
-      <Typography
-        variant="h3"
-        component="h1"
-        sx={{ mb: 4, textAlign: "left" }}
-      >
+      <Typography variant="h3" component="h1" sx={{ mb: 4, textAlign: "left" }}>
         Fee Management
       </Typography>
 
-      {isLoading && <PageLoader />}
-
-      {isError && (
+      {/* Institutes Section */}
+      {isLoadingInstitutes || isLoadingFeeStructures ? (
+        <PageLoader />
+      ) : isInstitutesError || isFeeStructuresError ? (
         <Box sx={{ textAlign: "center", my: 4 }}>
           <Typography variant="body1" color="error" gutterBottom>
-            Failed to load institutes: {error?.message || "An unexpected error occurred"}
+            Failed to load data:{" "}
+            {institutesError?.message ||
+              feeStructuresError?.message ||
+              "An unexpected error occurred"}
           </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => refetch()}
+            onClick={() => {
+              if (isInstitutesError) refetchInstitutes();
+              if (isFeeStructuresError) refetchFeeStructures();
+            }}
             sx={{ mt: 2 }}
           >
             Retry
           </Button>
         </Box>
-      )}
-
-      {isSuccess && institutes && institutes.length > 0 && (
+      ) : isInstitutesSuccess && institutes && institutes.length > 0 ? (
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: {
-              xs: "repeat(2, 1fr)", // 2 cards on mobile
-              sm: "repeat(4, 1fr)", // 4 cards on small screens
-              md: "repeat(5, 1fr)", // 5 cards on medium/large screens
+              xs: "repeat(2, 1fr)",
+              sm: "repeat(4, 1fr)",
+              md: "repeat(5, 1fr)",
             },
-            gap: 2, // Reduced gap for tighter layout
+            gap: 2,
             justifyContent: "center",
           }}
         >
@@ -87,37 +110,25 @@ const FeePage: React.FC = () => {
                 instituteName={institute.institute_name}
                 category={institute.institute_category}
                 imageUrl={institute.image_url}
-                onClick={() => handleOpen(institute)}
+                onClick={() => handleOpenFeeModal(institute.institute_category)}
               />
             </Box>
           ))}
         </Box>
-      )}
-
-      {isSuccess && institutes?.length === 0 && (
+      ) : (
         <Typography variant="body1" align="center" color="textSecondary">
           No institutes found.
         </Typography>
       )}
 
-      <InstituteModal
-        open={open}
-        onClose={handleClose}
-        institute={selectedInstitute}
+      <FeeStructureModal
+        open={openFeeModal}
+        onClose={handleCloseFeeModal}
+        feeStructures={filteredFeeStructures}
+        instituteCategory={selectedCategory || ""}
       />
 
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            router.push("/");
-          }}
-          startIcon={<ArrowBack />}
-        >
-          Back to Home
-        </Button>
-      </Box>
+      <BackToHomeButton />
     </Box>
   );
 };
