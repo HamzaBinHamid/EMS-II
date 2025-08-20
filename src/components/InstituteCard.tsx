@@ -2,7 +2,6 @@ import { Card, CardContent, Typography, CardActionArea, CardMedia, Box } from "@
 
 interface InstituteCardProps {
   instituteName: string;
-  category: string;
   imageUrl?: string | null;
   onClick: () => void;
 }

@@ -7,8 +7,6 @@ export interface SubjectWithFee {
 
 export interface FeeStructure {
   id: string;
-  institute_category: string;
-  grades: string[];
-  created_at: string;
+  grades: string; // 👈 changed from string[] to string
   subjects_with_fee: SubjectWithFee[];
 }

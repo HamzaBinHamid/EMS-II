@@ -19,6 +19,8 @@ import {
   StepLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import supabase from "@/lib/supabase"; // ✅ correct import path you shared
+import { FeeStructure } from "@/types/feeStructure";
 
 interface FeeStructureModalProps {
   open: boolean;
@@ -34,7 +36,6 @@ interface FeeStructureModalProps {
   }) => void;
 }
 
-const SUBJECT_OPTIONS = ["English", "Math", "Chemistry", "Physics", "Biology"];
 const STEPS = ["Grade", "Mode", "Subjects"];
 
 const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
@@ -45,12 +46,18 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
   const [step, setStep] = useState<"siblings" | "grade" | "mode" | "subjects">(
     "siblings"
   );
+  const [subjectOptions, setSubjectOptions] = useState<
+    { name: string; fee: number }[]
+  >([]);
+
   const [siblings, setSiblings] = useState<number>(0);
   const [currentSibling, setCurrentSibling] = useState(0);
 
   const [details, setDetails] = useState<
     { grade: string; mode: string; subjects: string[]; subjectType: string }[]
   >([]);
+
+  const [gradeOptions, setGradeOptions] = useState<string[]>([]);
 
   // Reset when modal opens
   useEffect(() => {
@@ -62,27 +69,69 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
     }
   }, [open]);
 
+  // Fetch grade options from Supabase
+  useEffect(() => {
+    const fetchGrades = async () => {
+      const { data, error } = await supabase
+        .from("fee_structure")
+        .select("grades"); // 👈 "grades" is now text (not array)
+
+      if (error) {
+        console.error("Error fetching grades:", error);
+        return;
+      }
+
+      if (data) {
+        const feeStructures = data as Pick<FeeStructure, "grades">[];
+        const uniqueGrades = Array.from(
+          new Set(feeStructures.map((item) => item.grades))
+        ); // 👈 no flatMap
+        setGradeOptions(uniqueGrades);
+      }
+    };
+
+    fetchGrades();
+  }, []);
+
   // ---- Handlers ----
   const handleSelectSiblings = (value: number) => {
     setSiblings(value);
     setDetails(
-      Array(value).fill(null).map(() => ({
-        grade: "",
-        mode: "",
-        subjects: [],
-        subjectType: "",
-      }))
+      Array(value)
+        .fill(null)
+        .map(() => ({
+          grade: "",
+          mode: "",
+          subjects: [],
+          subjectType: "",
+        }))
     );
     setStep("grade");
     setCurrentSibling(0);
   };
 
-  const handleGradeChange = (grade: string) => {
-    const updated = [...details];
-    updated[currentSibling].grade = grade;
-    setDetails(updated);
-    setStep("mode");
-  };
+const handleGradeChange = async (grade: string) => {
+  const updated = [...details];
+  updated[currentSibling].grade = grade;
+  setDetails(updated);
+  setStep("mode");
+
+  // ✅ Match grade (string now)
+  const { data, error } = await supabase
+    .from("fee_structure")
+    .select("subjects_with_fee")
+    .eq("grades", grade)   // 👈 changed from .contains to .eq
+    .single();
+
+  if (error) {
+    console.error("Error fetching subjects:", error);
+    return;
+  }
+
+  if (data) {
+    setSubjectOptions(data.subjects_with_fee); // [{ name: "Math", fee: 2000 }, ...]
+  }
+};
 
   const handleModeChange = (mode: string) => {
     const updated = [...details];
@@ -95,7 +144,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
     const updated = [...details];
     updated[currentSibling].subjectType = type;
     updated[currentSibling].subjects =
-      type === "all" ? SUBJECT_OPTIONS : [];
+      type === "all" ? subjectOptions.map((s) => s.name) : [];
     setDetails(updated);
   };
 
@@ -207,8 +256,8 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                       label="Grade"
                       onChange={(e) => handleGradeChange(e.target.value)}
                     >
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
-                        <MenuItem key={g} value={g.toString()}>
+                      {gradeOptions.map((g) => (
+                        <MenuItem key={g} value={g}>
                           Grade {g}
                         </MenuItem>
                       ))}
@@ -269,18 +318,18 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
 
                   {details[currentSibling]?.subjectType === "selective" && (
                     <FormGroup>
-                      {SUBJECT_OPTIONS.map((subject) => (
+                      {subjectOptions.map((subject) => (
                         <FormControlLabel
-                          key={subject}
+                          key={subject.name}
                           control={
                             <Checkbox
-                              checked={details[currentSibling].subjects.includes(
-                                subject
-                              )}
-                              onChange={() => handleSubjectToggle(subject)}
+                              checked={details[
+                                currentSibling
+                              ].subjects.includes(subject.name)}
+                              onChange={() => handleSubjectToggle(subject.name)}
                             />
                           }
-                          label={subject}
+                          label={`${subject.name}`}
                         />
                       ))}
                     </FormGroup>

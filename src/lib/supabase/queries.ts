@@ -10,7 +10,7 @@ const supabase = createClient(
 export async function fetchInstitutes(): Promise<Institute[]> {
   const { data, error } = await supabase
     .from("institutes")
-    .select("institute_name, institute_category, image_url");
+    .select("institute_name, image_url");
 
   if (error) throw error;
 
@@ -30,7 +30,7 @@ export async function fetchInstitutes(): Promise<Institute[]> {
 export async function fetchFeeStructures(): Promise<FeeStructure[]> {
   const { data, error } = await supabase
     .from("fee_structure")
-    .select("id, institute_category, grades, created_at, subjects_with_fee");
+    .select("id, grades, subjects_with_fee");
 
   if (error) throw error;
 
