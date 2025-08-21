@@ -19,45 +19,34 @@ import {
   StepLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import supabase from "@/lib/supabase"; // ✅ correct import path you shared
-import { FeeStructure } from "@/types/feeStructure";
+import supabase from "@/lib/supabase";
+import { FeeStructure, SiblingDetail } from "@/types/feeStructure";
+import { calculateTotalFee } from "@/utils/calculateTotalFee";
 
 interface FeeStructureModalProps {
   open: boolean;
   onClose: () => void;
-  onSave?: (data: {
-    siblings: number;
-    details: {
-      grade: string;
-      mode: string;
-      subjects: string[];
-      subjectType: string;
-    }[];
-  }) => void;
+  onSave?: (data: { siblings: number; details: SiblingDetail[] }) => void;
 }
 
-const STEPS = ["Grade", "Mode", "Subjects"];
+const STEPS = ["Grade", "Mode", "Subjects", "Summary"];
 
 const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
   open,
   onClose,
   onSave,
 }) => {
-  const [step, setStep] = useState<"siblings" | "grade" | "mode" | "subjects">(
-    "siblings"
-  );
+  const [step, setStep] = useState<
+    "siblings" | "grade" | "mode" | "subjects" | "summary"
+  >("siblings");
   const [subjectOptions, setSubjectOptions] = useState<
     { name: string; fee: number }[]
   >([]);
-
   const [siblings, setSiblings] = useState<number>(0);
   const [currentSibling, setCurrentSibling] = useState(0);
-
-  const [details, setDetails] = useState<
-    { grade: string; mode: string; subjects: string[]; subjectType: string }[]
-  >([]);
-
+  const [details, setDetails] = useState<SiblingDetail[]>([]);
   const [gradeOptions, setGradeOptions] = useState<string[]>([]);
+  const [feeStructures, setFeeStructures] = useState<FeeStructure[]>([]);
 
   // Reset when modal opens
   useEffect(() => {
@@ -69,12 +58,12 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
     }
   }, [open]);
 
-  // Fetch grade options from Supabase
+  // Fetch grade options + all feeStructures
   useEffect(() => {
     const fetchGrades = async () => {
       const { data, error } = await supabase
         .from("fee_structure")
-        .select("grades"); // 👈 "grades" is now text (not array)
+        .select("id, grades, subjects_with_fee");
 
       if (error) {
         console.error("Error fetching grades:", error);
@@ -82,10 +71,9 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
       }
 
       if (data) {
-        const feeStructures = data as Pick<FeeStructure, "grades">[];
-        const uniqueGrades = Array.from(
-          new Set(feeStructures.map((item) => item.grades))
-        ); // 👈 no flatMap
+        const structures = data as FeeStructure[];
+        setFeeStructures(structures);
+        const uniqueGrades = Array.from(new Set(structures.map((i) => i.grades)));
         setGradeOptions(uniqueGrades);
       }
     };
@@ -103,35 +91,24 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
           grade: "",
           mode: "",
           subjects: [],
-          subjectType: "",
+          subjectType: "all" as "all" | "selective",
         }))
     );
     setStep("grade");
     setCurrentSibling(0);
   };
 
-const handleGradeChange = async (grade: string) => {
-  const updated = [...details];
-  updated[currentSibling].grade = grade;
-  setDetails(updated);
-  setStep("mode");
+  const handleGradeChange = async (grade: string) => {
+    const updated = [...details];
+    updated[currentSibling].grade = grade;
+    setDetails(updated);
+    setStep("mode");
 
-  // ✅ Match grade (string now)
-  const { data, error } = await supabase
-    .from("fee_structure")
-    .select("subjects_with_fee")
-    .eq("grades", grade)   // 👈 changed from .contains to .eq
-    .single();
-
-  if (error) {
-    console.error("Error fetching subjects:", error);
-    return;
-  }
-
-  if (data) {
-    setSubjectOptions(data.subjects_with_fee); // [{ name: "Math", fee: 2000 }, ...]
-  }
-};
+    const structure = feeStructures.find((fs) => fs.grades === grade);
+    if (structure) {
+      setSubjectOptions(structure.subjects_with_fee);
+    }
+  };
 
   const handleModeChange = (mode: string) => {
     const updated = [...details];
@@ -140,11 +117,16 @@ const handleGradeChange = async (grade: string) => {
     setStep("subjects");
   };
 
-  const handleSubjectTypeChange = (type: string) => {
+  const handleSubjectTypeChange = (type: "all" | "selective") => {
     const updated = [...details];
     updated[currentSibling].subjectType = type;
-    updated[currentSibling].subjects =
-      type === "all" ? subjectOptions.map((s) => s.name) : [];
+
+    if (type === "all") {
+      updated[currentSibling].subjects = ["All"];
+    } else {
+      updated[currentSibling].subjects = [];
+    }
+
     setDetails(updated);
   };
 
@@ -164,8 +146,7 @@ const handleGradeChange = async (grade: string) => {
       setCurrentSibling((prev) => prev + 1);
       setStep("grade");
     } else {
-      if (onSave) onSave({ siblings, details });
-      onClose();
+      setStep("summary");
     }
   };
 
@@ -179,13 +160,20 @@ const handleGradeChange = async (grade: string) => {
       setStep("grade");
     } else if (step === "subjects") {
       setStep("mode");
+    } else if (step === "summary") {
+      setStep("subjects");
     }
   };
 
-  // ---- Helpers ----
-  const siblingTitle = `Sibling ${currentSibling + 1} of ${siblings}`;
+  const handleFinish = () => {
+    if (onSave) onSave({ siblings, details });
+    onClose();
+  };
+
+  // ---- UI ----
+  const siblingTitle = step !== "summary" ? `Sibling ${currentSibling + 1} of ${siblings}` : "";
   const activeStepIndex =
-    step === "grade" ? 0 : step === "mode" ? 1 : step === "subjects" ? 2 : -1;
+    step === "grade" ? 0 : step === "mode" ? 1 : step === "subjects" ? 2 : step === "summary" ? 3 : -1;
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -209,7 +197,6 @@ const handleGradeChange = async (grade: string) => {
           <CloseIcon />
         </IconButton>
 
-        {/* Step 1: Select siblings */}
         {step === "siblings" && (
           <>
             <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -231,7 +218,6 @@ const handleGradeChange = async (grade: string) => {
           </>
         )}
 
-        {/* Steps for each sibling */}
         {step !== "siblings" && (
           <>
             <Typography variant="subtitle1" gutterBottom>
@@ -245,8 +231,9 @@ const handleGradeChange = async (grade: string) => {
                 </Step>
               ))}
             </Stepper>
+
             <Box mt={3}>
-              {/* Step 2: Grade */}
+              {/* Grade */}
               {step === "grade" && (
                 <>
                   <FormControl fullWidth size="small" margin="normal">
@@ -272,7 +259,7 @@ const handleGradeChange = async (grade: string) => {
                 </>
               )}
 
-              {/* Step 3: Mode */}
+              {/* Mode */}
               {step === "mode" && (
                 <>
                   <RadioGroup
@@ -297,12 +284,14 @@ const handleGradeChange = async (grade: string) => {
                 </>
               )}
 
-              {/* Step 4: Subjects */}
+              {/* Subjects */}
               {step === "subjects" && (
                 <>
                   <RadioGroup
                     value={details[currentSibling]?.subjectType || ""}
-                    onChange={(e) => handleSubjectTypeChange(e.target.value)}
+                    onChange={(e) =>
+                      handleSubjectTypeChange(e.target.value as "all" | "selective")
+                    }
                   >
                     <FormControlLabel
                       value="all"
@@ -318,20 +307,38 @@ const handleGradeChange = async (grade: string) => {
 
                   {details[currentSibling]?.subjectType === "selective" && (
                     <FormGroup>
-                      {subjectOptions.map((subject) => (
-                        <FormControlLabel
-                          key={subject.name}
-                          control={
-                            <Checkbox
-                              checked={details[
-                                currentSibling
-                              ].subjects.includes(subject.name)}
-                              onChange={() => handleSubjectToggle(subject.name)}
-                            />
-                          }
-                          label={`${subject.name}`}
-                        />
-                      ))}
+                      {subjectOptions
+                        .filter((s) => s.name !== "All")
+                        .map((subject) => (
+                          <FormControlLabel
+                            key={subject.name}
+                            control={
+                              <Checkbox
+                                checked={details[
+                                  currentSibling
+                                ].subjects.includes(subject.name)}
+                                onChange={() =>
+                                  handleSubjectToggle(subject.name)
+                                }
+                              />
+                            }
+                            label={
+                              <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                width="100%"
+                              >
+                                <Typography>{subject.name}</Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Rs. {subject.fee}
+                                </Typography>
+                              </Box>
+                            }
+                          />
+                        ))}
                     </FormGroup>
                   )}
 
@@ -349,8 +356,39 @@ const handleGradeChange = async (grade: string) => {
                       }
                     >
                       {currentSibling + 1 === siblings
-                        ? "Finish"
+                        ? "Summary"
                         : "Next Sibling"}
+                    </Button>
+                  </Box>
+                </>
+              )}
+
+              {/* Summary */}
+              {step === "summary" && (
+                <>
+                  <Typography variant="h6" gutterBottom>
+                    Summary
+                  </Typography>
+                  {details.map((d, idx) => (
+                    <Box key={idx} mb={2}>
+                      <Typography>
+                        <strong>Sibling {idx + 1}</strong>: Grade {d.grade},{" "}
+                        {d.mode}, {d.subjectType === "all"
+                          ? "All Subjects"
+                          : d.subjects.join(", ")}
+                      </Typography>
+                    </Box>
+                  ))}
+                  <Typography variant="h6" sx={{ mt: 2 }}>
+                    Total Fee: Rs. {calculateTotalFee(details, feeStructures)}
+                  </Typography>
+
+                  <Box display="flex" justifyContent="space-between" mt={2}>
+                    <Button variant="outlined" onClick={handleBack}>
+                      Back
+                    </Button>
+                    <Button variant="contained" onClick={handleFinish}>
+                      Finish
                     </Button>
                   </Box>
                 </>
