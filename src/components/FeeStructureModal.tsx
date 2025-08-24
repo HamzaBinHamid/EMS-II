@@ -414,32 +414,53 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                         feeStructures
                       ).toLocaleString()}
                     </Box>
-
                     {/* Discount */}
                     {siblings > 1 &&
                       (() => {
+                        // Calculate base total (without sibling discount, but with mode and subject discounts)
                         const baseTotal = details.reduce((sum, d) => {
                           const fs = feeStructures.find(
                             (f) => f.grades === d.grade
                           );
                           if (!fs) return sum;
 
+                          let siblingFee = 0;
+
                           if (d.subjectType === "all") {
                             const allFee = fs.subjects_with_fee.find(
                               (s) => s.name === "All"
                             );
-                            return sum + (allFee?.fee || 0);
+                            siblingFee = allFee?.fee || 0;
                           } else {
-                            return (
-                              sum +
-                              d.subjects.reduce((s, subj) => {
-                                const sub = fs.subjects_with_fee.find(
-                                  (sf) => sf.name === subj
-                                );
-                                return s + (sub?.fee || 0);
-                              }, 0)
-                            );
+                            const subjectCount = d.subjects.length;
+                            if (subjectCount > 4) {
+                              const allFee = fs.subjects_with_fee.find(
+                                (s) => s.name === "All"
+                              );
+                              siblingFee = allFee?.fee || 0;
+                            } else {
+                              const baseFee = fs.subjects_with_fee
+                                .filter((s) => d.subjects.includes(s.name))
+                                .reduce((s, subj) => s + subj.fee, 0);
+
+                              // Apply subject count discounts
+                              let subjectDiscount = 0;
+                              if (subjectCount === 2) subjectDiscount = 0.2;
+                              else if (subjectCount === 3)
+                                subjectDiscount = 0.3;
+                              else if (subjectCount === 4)
+                                subjectDiscount = 0.4;
+
+                              siblingFee = baseFee - baseFee * subjectDiscount;
+                            }
                           }
+
+                          // Apply mode multiplier
+                          if (d.mode === "On Campus") siblingFee *= 1;
+                          else if (d.mode === "Online") siblingFee *= 2;
+                          else if (d.mode === "Home Tuition") siblingFee *= 3;
+
+                          return sum + siblingFee;
                         }, 0);
 
                         const discountPercent =
@@ -457,7 +478,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                         );
                         const discountAmount = baseTotal - discountedTotal;
 
-                        // round discount to nearest 500
+                        // Round discount to nearest 500
                         const roundedDiscount =
                           Math.round(discountAmount / 500) * 500;
 
@@ -470,11 +491,11 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                               fontWeight: "bold",
                             }}
                           >
-                            Siblings Discount Applied: {discountPercent}% <br />
-                            You Saved: ≈ Rs. {roundedDiscount.toLocaleString()}
+                            Siblings Discount Applied ≈ {discountPercent}% <br />
+                            You Saved ≈ Rs. {formatNumber(roundedDiscount)}
                           </Typography>
                         );
-                      })()}
+                      })()}{" "}
                   </Box>
 
                   {/* Scrollable Sibling Details */}

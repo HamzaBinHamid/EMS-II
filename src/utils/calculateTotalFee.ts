@@ -1,10 +1,9 @@
 import { FeeStructure, SiblingDetail } from "@/types/feeStructure";
 
-// types/feeStructure.ts already has FeeStructure + SiblingDetail
-
 export function calculateTotalFee(
   details: SiblingDetail[],
-  feeStructures: FeeStructure[]
+  feeStructures: FeeStructure[],
+  skipSiblingDiscount: boolean = false
 ): number {
   let totalFee = 0;
 
@@ -22,12 +21,27 @@ export function calculateTotalFee(
       );
       siblingFee = allSubject ? allSubject.fee : 0;
     } else if (sibling.subjectType === "selective") {
-      siblingFee = feeStructure.subjects_with_fee
-        .filter((s) => sibling.subjects.includes(s.name))
-        .reduce((sum, subj) => sum + subj.fee, 0);
+      const subjectCount = sibling.subjects.length;
+
+      if (subjectCount > 4) {
+        const allSubject = feeStructure.subjects_with_fee.find(
+          (s) => s.name === "All"
+        );
+        siblingFee = allSubject ? allSubject.fee : 0;
+      } else {
+        const baseFee = feeStructure.subjects_with_fee
+          .filter((s) => sibling.subjects.includes(s.name))
+          .reduce((sum, subj) => sum + subj.fee, 0);
+
+        let subjectDiscount = 0;
+        if (subjectCount === 2) subjectDiscount = 0.2;
+        else if (subjectCount === 3) subjectDiscount = 0.3;
+        else if (subjectCount === 4) subjectDiscount = 0.4;
+
+        siblingFee = baseFee - baseFee * subjectDiscount;
+      }
     }
 
-    // Mode multiplier
     if (sibling.mode === "On Campus") siblingFee *= 1;
     else if (sibling.mode === "Online") siblingFee *= 2;
     else if (sibling.mode === "Home Tuition") siblingFee *= 3;
@@ -35,18 +49,18 @@ export function calculateTotalFee(
     totalFee += siblingFee;
   });
 
-  // Discounts
-  const siblingCount = details.length;
-  let discount = 0;
-  if (siblingCount === 2) discount = 0.2;
-  else if (siblingCount === 3) discount = 0.3;
-  else if (siblingCount >= 4) discount = 0.35;
+  if (!skipSiblingDiscount) {
+    const siblingCount = details.length;
+    let discount = 0;
+    if (siblingCount === 2) discount = 0.2;
+    else if (siblingCount === 3) discount = 0.3;
+    else if (siblingCount >= 4) discount = 0.35;
 
-  if (discount > 0) {
-    totalFee = totalFee - totalFee * discount;
+    if (discount > 0) {
+      totalFee = totalFee - totalFee * discount;
+    }
   }
 
-  // Round to nearest 500
   totalFee = Math.round(totalFee / 500) * 500;
 
   return totalFee;
@@ -56,3 +70,4 @@ export function calculateTotalFee(
 export function formatNumber(num: number): string {
   return num.toLocaleString("en-PK"); // e.g. 1,234,500
 }
+
