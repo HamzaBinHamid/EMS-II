@@ -24,12 +24,14 @@ import supabase from "@/lib/supabase";
 import { FeeStructure, SiblingDetail } from "@/types/feeStructure";
 import { calculateTotalFee, formatNumber } from "@/utils/calculateTotalFee";
 
+// In your FeeStructureModal component file
 interface FeeStructureModalProps {
   open: boolean;
   onClose: () => void;
+  instituteName: string | null;
+  feeStructures: FeeStructure[];
   onSave?: (data: { siblings: number; details: SiblingDetail[] }) => void;
 }
-
 const STEPS = ["Grade", "Mode", "Subjects", "Fee"];
 
 const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
@@ -491,7 +493,8 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                               fontWeight: "bold",
                             }}
                           >
-                            Siblings Discount Applied ≈ {discountPercent}% <br />
+                            Siblings Discount Applied ≈ {discountPercent}%{" "}
+                            <br />
                             You Saved ≈ Rs. {formatNumber(roundedDiscount)}
                           </Typography>
                         );

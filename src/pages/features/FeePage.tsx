@@ -11,15 +11,15 @@ import type { FeeStructure } from "@/types/feeStructure";
 
 const FeePage: React.FC = () => {
   const [openFeeModal, setOpenFeeModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedInstitute, setSelectedInstitute] = useState<string | null>(null);
 
-  const handleOpenFeeModal = (category: string) => {
-    setSelectedCategory(category);
+  const handleOpenFeeModal = (instituteName: string) => {
+    setSelectedInstitute(instituteName);
     setOpenFeeModal(true);
   };
 
   const handleCloseFeeModal = () => {
-    setSelectedCategory(null);
+    setSelectedInstitute(null);
     setOpenFeeModal(false);
   };
 
@@ -55,12 +55,6 @@ const FeePage: React.FC = () => {
     retry: 2,
     retryDelay: 1000,
   });
-
-  // Filter fee structures by selected category
-  const filteredFeeStructures =
-    selectedCategory && feeStructures
-      ? feeStructures.filter((fs) => fs.institute_category === selectedCategory)
-      : [];
 
   return (
     <Box sx={{ maxWidth: "1000px", margin: "auto", padding: { xs: 2, sm: 4 } }}>
@@ -104,13 +98,12 @@ const FeePage: React.FC = () => {
             justifyContent: "center",
           }}
         >
-          {institutes.map((institute) => (
-            <Box key={institute.institute_name}>
+          {institutes.map((institute, index) => (
+            <Box key={`${institute.institute_name}-${index}`}>
               <InstituteCard
                 instituteName={institute.institute_name}
-                category={institute.institute_category}
                 imageUrl={institute.image_url}
-                onClick={() => handleOpenFeeModal(institute.institute_category)}
+                onClick={() => handleOpenFeeModal(institute.institute_name)}
               />
             </Box>
           ))}
@@ -121,11 +114,12 @@ const FeePage: React.FC = () => {
         </Typography>
       )}
 
+      {/* Modal */}
       <FeeStructureModal
         open={openFeeModal}
         onClose={handleCloseFeeModal}
-        feeStructures={filteredFeeStructures}
-        instituteCategory={selectedCategory || ""}
+        instituteName={selectedInstitute}
+        feeStructures={feeStructures || []}
       />
 
       <BackToHomeButton />

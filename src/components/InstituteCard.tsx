@@ -10,7 +10,7 @@ const InstituteCard: React.FC<InstituteCardProps> = ({ instituteName, imageUrl, 
   return (
     <Card
       sx={{
-        maxWidth: { xs: 140, sm: 150, md: 160 }, // Reduced card width
+        maxWidth: { xs: 140, sm: 150, md: 160 },
         mx: "auto",
       }}
     >
@@ -19,7 +19,7 @@ const InstituteCard: React.FC<InstituteCardProps> = ({ instituteName, imageUrl, 
           <CardMedia
             component="img"
             sx={{
-              height: { xs: 80, sm: 90, md: 100 }, // Reduced image height
+              height: { xs: 80, sm: 90, md: 100 },
               objectFit: "contain",
               width: "100%",
             }}
@@ -42,16 +42,12 @@ const InstituteCard: React.FC<InstituteCardProps> = ({ instituteName, imageUrl, 
             </Typography>
           </Box>
         )}
-        <CardContent
-          sx={{
-            p: { xs: 0.5, sm: 1 }, // Reduced padding
-          }}
-        >
+        <CardContent sx={{ p: { xs: 0.5, sm: 1 } }}>
           <Typography
             variant="h6"
             fontWeight="bold"
             sx={{
-              fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" }, // Smaller font size
+              fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               textAlign: "center",
             }}
           >

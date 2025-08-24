@@ -6,7 +6,7 @@ const theme = createTheme({
     primary: { main: "#1E88E5" },
     secondary: { main: "#F50057" },
     background: { default: "#FFFFFF", paper: "#F5F5F5" },
-    text: { primary: "#212121", secondary: "#616161" },
+    text: { primary: "#212121", secondary: "#616161", disabled: "#BDBDBD" },
   },
   typography: {
     fontFamily: "'Plus Jakarta Sans', sans-serif",
