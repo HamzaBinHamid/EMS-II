@@ -24,13 +24,16 @@ import supabase from "@/lib/supabase";
 import { FeeStructure, SiblingDetail } from "@/types/feeStructure";
 import { calculateTotalFee, formatNumber } from "@/utils/calculateTotalFee";
 
-// In your FeeStructureModal component file
 interface FeeStructureModalProps {
   open: boolean;
   onClose: () => void;
-  instituteName: string | null;
   feeStructures: FeeStructure[];
-  onSave?: (data: { siblings: number; details: SiblingDetail[] }) => void;
+  onSave?: (data: {
+    siblings: number;
+    details: SiblingDetail[];
+    acCharges: boolean;
+    deservingDiscount: boolean;
+  }) => void;
 }
 const STEPS = ["Grade", "Mode", "Subjects", "Fee"];
 
@@ -48,8 +51,13 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
   const [siblings, setSiblings] = useState<number>(0);
   const [currentSibling, setCurrentSibling] = useState(0);
   const [details, setDetails] = useState<SiblingDetail[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [gradeOptions, setGradeOptions] = useState<string[]>([]);
   const [feeStructures, setFeeStructures] = useState<FeeStructure[]>([]);
+
+  // NEW: Extra charges / discounts
+  const [acCharges, setAcCharges] = useState(false);
+  const [deservingDiscount, setDeservingDiscount] = useState(false);
 
   // Reset when modal opens
   useEffect(() => {
@@ -58,6 +66,8 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
       setSiblings(0);
       setCurrentSibling(0);
       setDetails([]);
+      setAcCharges(false);
+      setDeservingDiscount(false);
     }
   }, [open]);
 
@@ -66,7 +76,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
     const fetchGrades = async () => {
       const { data, error } = await supabase
         .from("fee_structure")
-        .select("id, grades, subjects_with_fee");
+        .select("id, order, grades, subjects_with_fee");
 
       if (error) {
         console.error("Error fetching grades:", error);
@@ -171,7 +181,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
   };
 
   const handleFinish = () => {
-    if (onSave) onSave({ siblings, details });
+    if (onSave) onSave({ siblings, details, acCharges, deservingDiscount });
     onClose();
   };
 
@@ -188,6 +198,20 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
       ? 3
       : -1;
 
+  // ---- Fee Calculation with Extras ----
+  const calculateFinalTotal = () => {
+    let total = calculateTotalFee(details, feeStructures); // includes sibling discount
+
+    if (acCharges) {
+      total += siblings * 1000;
+    }
+    if (deservingDiscount) {
+      total = total - total * 0.2;
+    }
+
+    return Math.round(total / 500) * 500;
+  };
+
   // ---- Render ----
   return (
     <Modal open={open} onClose={onClose}>
@@ -203,7 +227,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
           position: "relative",
           display: "flex",
           flexDirection: "column",
-          maxHeight: "90vh", // prevent modal overflow
+          maxHeight: "90vh",
         }}
       >
         {/* Close Button */}
@@ -263,11 +287,18 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                       label="Grade"
                       onChange={(e) => handleGradeChange(e.target.value)}
                     >
-                      {gradeOptions.map((g) => (
-                        <MenuItem key={g} value={g}>
-                          Grade {g}
-                        </MenuItem>
-                      ))}
+                      {feeStructures
+                        .sort((a, b) => a.order - b.order)
+                        .map((feeStructure) => (
+                          <MenuItem
+                            key={feeStructure.id}
+                            value={feeStructure.grades}
+                          >
+                            {/\d/.test(feeStructure.grades)
+                              ? `Grade ${feeStructure.grades}`
+                              : feeStructure.grades}
+                          </MenuItem>
+                        ))}
                     </Select>
                   </FormControl>
 
@@ -278,7 +309,6 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                   </Box>
                 </>
               )}
-
               {/* Mode */}
               {step === "mode" && (
                 <>
@@ -306,7 +336,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
 
               {/* Subjects */}
               {step === "subjects" && (
-                <>
+                <Box sx={{ maxHeight: "60vh", overflowY: "auto", padding: 2 }}>
                   <RadioGroup
                     value={details[currentSibling]?.subjectType || ""}
                     onChange={(e) =>
@@ -329,38 +359,44 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
 
                   {details[currentSibling]?.subjectType === "selective" && (
                     <FormGroup>
-                      {subjectOptions
-                        .filter((s) => s.name !== "All")
-                        .map((subject) => (
-                          <FormControlLabel
-                            key={subject.name}
-                            control={
-                              <Checkbox
-                                checked={details[
-                                  currentSibling
-                                ].subjects.includes(subject.name)}
-                                onChange={() =>
-                                  handleSubjectToggle(subject.name)
-                                }
-                              />
-                            }
-                            label={
-                              <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                width="100%"
-                              >
-                                <Typography>{subject.name}</Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                          mt: 2,
+                          height: "40vh",
+                          overflowY: "scroll",
+                          pr: 1,
+                        }}
+                      >
+                        {subjectOptions
+                          .filter((s) => s.name !== "All")
+                          .map((subject) => (
+                            <FormControlLabel
+                              key={subject.name}
+                              control={
+                                <Checkbox
+                                  checked={details[
+                                    currentSibling
+                                  ].subjects.includes(subject.name)}
+                                  onChange={() =>
+                                    handleSubjectToggle(subject.name)
+                                  }
+                                />
+                              }
+                              label={
+                                <Box
+                                  display="flex"
+                                  justifyContent="space-between"
+                                  width="100%"
                                 >
-                                  Rs. {formatNumber(subject.fee)}
-                                </Typography>
-                              </Box>
-                            }
-                          />
-                        ))}
+                                  <Typography>{subject.name}</Typography>
+                                </Box>
+                              }
+                            />
+                          ))}
+                      </Box>
                     </FormGroup>
                   )}
 
@@ -378,11 +414,11 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                       }
                     >
                       {currentSibling + 1 === siblings
-                        ? "Summary"
+                        ? "Check Fee →"
                         : "Next Sibling"}
                     </Button>
                   </Box>
-                </>
+                </Box>
               )}
 
               {/* Summary */}
@@ -397,108 +433,76 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                 >
                   {/* Top Section: Total Fee + Discount */}
                   <Box sx={{ mb: 2 }}>
-                    {/* Total Fee */}
+                    {/* Base Total */}
                     <Box
                       sx={{
                         textAlign: "center",
                         backgroundColor: "primary.main",
                         color: "primary.contrastText",
-                        py: 2,
+                        py: 1,
                         borderRadius: 2,
                         fontWeight: "bold",
-                        fontSize: "1.7rem",
+                        fontSize: "1rem",
                         mb: 1,
                       }}
                     >
-                      Total Fee: Rs.{" "}
-                      {calculateTotalFee(
-                        details,
-                        feeStructures
-                      ).toLocaleString()}
+                      Total Fee: Rs. {formatNumber(calculateFinalTotal())}
                     </Box>
-                    {/* Discount */}
-                    {siblings > 1 &&
-                      (() => {
-                        // Calculate base total (without sibling discount, but with mode and subject discounts)
-                        const baseTotal = details.reduce((sum, d) => {
-                          const fs = feeStructures.find(
-                            (f) => f.grades === d.grade
-                          );
-                          if (!fs) return sum;
 
-                          let siblingFee = 0;
-
-                          if (d.subjectType === "all") {
-                            const allFee = fs.subjects_with_fee.find(
-                              (s) => s.name === "All"
-                            );
-                            siblingFee = allFee?.fee || 0;
-                          } else {
-                            const subjectCount = d.subjects.length;
-                            if (subjectCount > 4) {
-                              const allFee = fs.subjects_with_fee.find(
-                                (s) => s.name === "All"
-                              );
-                              siblingFee = allFee?.fee || 0;
-                            } else {
-                              const baseFee = fs.subjects_with_fee
-                                .filter((s) => d.subjects.includes(s.name))
-                                .reduce((s, subj) => s + subj.fee, 0);
-
-                              // Apply subject count discounts
-                              let subjectDiscount = 0;
-                              if (subjectCount === 2) subjectDiscount = 0.2;
-                              else if (subjectCount === 3)
-                                subjectDiscount = 0.3;
-                              else if (subjectCount === 4)
-                                subjectDiscount = 0.4;
-
-                              siblingFee = baseFee - baseFee * subjectDiscount;
-                            }
-                          }
-
-                          // Apply mode multiplier
-                          if (d.mode === "On Campus") siblingFee *= 1;
-                          else if (d.mode === "Online") siblingFee *= 2;
-                          else if (d.mode === "Home Tuition") siblingFee *= 3;
-
-                          return sum + siblingFee;
-                        }, 0);
-
-                        const discountPercent =
-                          siblings === 2
-                            ? 20
-                            : siblings === 3
-                            ? 30
-                            : siblings >= 4
-                            ? 35
-                            : 0;
-
-                        const discountedTotal = calculateTotalFee(
-                          details,
-                          feeStructures
-                        );
-                        const discountAmount = baseTotal - discountedTotal;
-
-                        // Round discount to nearest 500
-                        const roundedDiscount =
-                          Math.round(discountAmount / 500) * 500;
-
-                        return (
-                          <Typography
-                            variant="subtitle1"
-                            align="center"
+                    <FormGroup sx={{ mb: 1 }}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={acCharges}
+                            onChange={(e) => setAcCharges(e.target.checked)}
                             sx={{
-                              color: "red",
-                              fontWeight: "bold",
+                              transform: "scale(0.85)", // shrink further
+                              padding: "2px",
                             }}
-                          >
-                            Siblings Discount Applied ≈ {discountPercent}%{" "}
-                            <br />
-                            You Saved ≈ Rs. {formatNumber(roundedDiscount)}
-                          </Typography>
-                        );
-                      })()}{" "}
+                          />
+                        }
+                        label={
+                          <span>
+                            On Campus (AC charges) <strong>Rs. 1,000 -/ sibling</strong>
+                          </span>
+                        }
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.75rem",
+                          },
+                        }}
+                      />
+
+                      <Divider sx={{ my: 0.5 }} />
+
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={deservingDiscount}
+                            onChange={(e) =>
+                              setDeservingDiscount(e.target.checked)
+                            }
+                            sx={{
+                              transform: "scale(0.85)",
+                              padding: "2px",
+                            }}
+                          />
+                        }
+                        label={
+                          <span>
+                            Deserving Students{" "}
+                            <strong>20% Discount</strong>
+                          </span>
+                        }
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.75rem",
+                          },
+                        }}
+                      />
+                    </FormGroup>
                   </Box>
 
                   {/* Scrollable Sibling Details */}

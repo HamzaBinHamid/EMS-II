@@ -5,6 +5,7 @@ export interface SubjectWithFee {
 
 export interface FeeStructure {
   id: number;
+  order: number;
   grades: string;
   subjects_with_fee: SubjectWithFee[];
 }

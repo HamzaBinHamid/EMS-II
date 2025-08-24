@@ -61,6 +61,7 @@ export function calculateTotalFee(
     }
   }
 
+  // round to nearest 500
   totalFee = Math.round(totalFee / 500) * 500;
 
   return totalFee;
@@ -70,4 +71,3 @@ export function calculateTotalFee(
 export function formatNumber(num: number): string {
   return num.toLocaleString("en-PK"); // e.g. 1,234,500
 }
-

@@ -5,14 +5,12 @@ import { getImageUrl } from "@/lib/getImageUrl";
 import { styled } from "@mui/material/styles";
 import CustomButton from "./CustomButton";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { useRouter } from "next/router";
+import FeeStructureModal from "./FeeStructureModal"; // 👈 Import modal
 
 interface BlogCardProps {
   imageFileName: string;
   alt?: string;
   buttonText?: string;
-  navigateTo?: string; 
-  onReadMore?: () => void; // 👈 Added prop
 }
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -24,6 +22,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
+  cursor: "pointer", // 👈 shows it's clickable
   "&:hover": {
     transform: "translateY(-8px)",
     boxShadow: theme.shadows[10],
@@ -37,8 +36,6 @@ const BlogCard: React.FC<BlogCardProps> = ({
   imageFileName,
   alt = "Blog image",
   buttonText = "Read more",
-  navigateTo = "/features/FeePage",
-  onReadMore, // 👈 Added here
 }) => {
   const [imgSrc, setImgSrc] = useState<string>(() => {
     try {
@@ -49,71 +46,84 @@ const BlogCard: React.FC<BlogCardProps> = ({
     }
   });
 
-  const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   return (
-    <StyledCard>
-      {/* Image */}
-      <Box
-        sx={(theme) => ({
-          position: "relative",
-          width: "100%",
-          aspectRatio: "16/9",
-          overflow: "hidden",
-          backgroundColor: theme.palette.grey[200],
-          borderTopLeftRadius: Number(theme.shape.borderRadius) * 2,
-          borderTopRightRadius: Number(theme.shape.borderRadius) * 2,
-        })}
-      >
-        <Image
-          src={imgSrc}
-          alt={alt}
-          fill
-          style={{
-            objectFit: "cover",
-          }}
-          sizes="(max-width: 600px) 100vw, 500px"
-          priority
-          onError={() => setImgSrc("/fallback.jpg")}
-        />
-      </Box>
-
-      {/* Centered Button */}
-      <CardActions sx={{ justifyContent: "center", p: 3 }}>
-        <CustomButton
-          onClick={() => {
-            if (onReadMore) onReadMore(); // 👈 Trigger callback
-            router.push(navigateTo);      // 👈 Navigate
-          }}
-          sx={{
-            background: (theme) =>
-              `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-            color: "#fff",
-            fontWeight: 600,
-            letterSpacing: "0.5px",
-            borderRadius: "30px",
-            fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
-            padding: { xs: "6px 16px", sm: "8px 20px", md: "10px 26px" },
-            boxShadow: (theme) => `0 4px 10px ${theme.palette.primary.main}40`,
-            transition: "all 0.3s ease",
-            "&:hover": {
-              background: (theme) =>
-                `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-              boxShadow: (theme) =>
-                `0 6px 14px ${theme.palette.primary.dark}50`,
-              transform: "translateY(-2px)",
-            },
-            "&:active": {
-              transform: "translateY(0)",
-              boxShadow: (theme) => `0 3px 6px ${theme.palette.primary.dark}40`,
-            },
-          }}
-          endIcon={<ArrowForwardIcon />}
+    <>
+      <StyledCard onClick={() => setOpen(true)}>
+        {/* Image */}
+        <Box
+          sx={(theme) => ({
+            position: "relative",
+            width: "100%",
+            aspectRatio: "16/9",
+            overflow: "hidden",
+            backgroundColor: theme.palette.grey[200],
+            borderTopLeftRadius: Number(theme.shape.borderRadius) * 2,
+            borderTopRightRadius: Number(theme.shape.borderRadius) * 2,
+          })}
         >
-          {buttonText}
-        </CustomButton>
-      </CardActions>
-    </StyledCard>
+          <Image
+            src={imgSrc}
+            alt={alt}
+            fill
+            style={{
+              objectFit: "cover",
+            }}
+            sizes="(max-width: 600px) 100vw, 500px"
+            priority
+            onError={() => setImgSrc("/fallback.jpg")}
+          />
+        </Box>
+
+        {/* Centered Button */}
+        <CardActions sx={{ justifyContent: "center", p: 3 }}>
+          <CustomButton
+            onClick={(e) => {
+              e.stopPropagation(); // 👈 prevent card click bubbling
+              setOpen(true);
+            }}
+            sx={{
+              background: (theme) =>
+                `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+              color: "#fff",
+              fontWeight: 600,
+              letterSpacing: "0.5px",
+              borderRadius: "30px",
+              fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              padding: { xs: "6px 16px", sm: "8px 20px", md: "10px 26px" },
+              boxShadow: (theme) =>
+                `0 4px 10px ${theme.palette.primary.main}40`,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                background: (theme) =>
+                  `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+                boxShadow: (theme) =>
+                  `0 6px 14px ${theme.palette.primary.dark}50`,
+                transform: "translateY(-2px)",
+              },
+              "&:active": {
+                transform: "translateY(0)",
+                boxShadow: (theme) =>
+                  `0 3px 6px ${theme.palette.primary.dark}40`,
+              },
+            }}
+            endIcon={<ArrowForwardIcon />}
+          >
+            {buttonText}
+          </CustomButton>
+        </CardActions>
+      </StyledCard>
+
+      {/* Modal */}
+      <FeeStructureModal
+        open={open}
+        onClose={() => setOpen(false)}
+        instituteName="Some Institute" // 👈 pass a real name here
+        feeStructures={[]} // 👈 or fetch from your backend
+        onSave={(data) => console.log("Saved:", data)}
+      />
+    </>
   );
 };
 
