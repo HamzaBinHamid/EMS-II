@@ -17,11 +17,12 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import supabase from "@/lib/supabase";
 import { FeeStructure, SiblingDetail } from "@/types/feeStructure";
-import { calculateTotalFee } from "@/utils/calculateTotalFee";
+import { calculateTotalFee, formatNumber } from "@/utils/calculateTotalFee";
 
 interface FeeStructureModalProps {
   open: boolean;
@@ -29,7 +30,7 @@ interface FeeStructureModalProps {
   onSave?: (data: { siblings: number; details: SiblingDetail[] }) => void;
 }
 
-const STEPS = ["Grade", "Mode", "Subjects", "Summary"];
+const STEPS = ["Grade", "Mode", "Subjects", "Fee"];
 
 const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
   open,
@@ -58,7 +59,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
     }
   }, [open]);
 
-  // Fetch grade options + all feeStructures
+  // Fetch grade options + feeStructures
   useEffect(() => {
     const fetchGrades = async () => {
       const { data, error } = await supabase
@@ -73,7 +74,9 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
       if (data) {
         const structures = data as FeeStructure[];
         setFeeStructures(structures);
-        const uniqueGrades = Array.from(new Set(structures.map((i) => i.grades)));
+        const uniqueGrades = Array.from(
+          new Set(structures.map((i) => i.grades))
+        );
         setGradeOptions(uniqueGrades);
       }
     };
@@ -98,7 +101,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
     setCurrentSibling(0);
   };
 
-  const handleGradeChange = async (grade: string) => {
+  const handleGradeChange = (grade: string) => {
     const updated = [...details];
     updated[currentSibling].grade = grade;
     setDetails(updated);
@@ -170,11 +173,20 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
     onClose();
   };
 
-  // ---- UI ----
-  const siblingTitle = step !== "summary" ? `Sibling ${currentSibling + 1} of ${siblings}` : "";
+  const siblingTitle =
+    step !== "summary" ? `Sibling ${currentSibling + 1} of ${siblings}` : "";
   const activeStepIndex =
-    step === "grade" ? 0 : step === "mode" ? 1 : step === "subjects" ? 2 : step === "summary" ? 3 : -1;
+    step === "grade"
+      ? 0
+      : step === "mode"
+      ? 1
+      : step === "subjects"
+      ? 2
+      : step === "summary"
+      ? 3
+      : -1;
 
+  // ---- Render ----
   return (
     <Modal open={open} onClose={onClose}>
       <Box
@@ -187,6 +199,9 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
           mx: "auto",
           mt: "5%",
           position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "90vh", // prevent modal overflow
         }}
       >
         {/* Close Button */}
@@ -219,7 +234,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
         )}
 
         {step !== "siblings" && (
-          <>
+          <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
             <Typography variant="subtitle1" gutterBottom>
               {siblingTitle}
             </Typography>
@@ -232,7 +247,10 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
               ))}
             </Stepper>
 
-            <Box mt={3}>
+            <Box
+              mt={3}
+              sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
+            >
               {/* Grade */}
               {step === "grade" && (
                 <>
@@ -290,7 +308,9 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                   <RadioGroup
                     value={details[currentSibling]?.subjectType || ""}
                     onChange={(e) =>
-                      handleSubjectTypeChange(e.target.value as "all" | "selective")
+                      handleSubjectTypeChange(
+                        e.target.value as "all" | "selective"
+                      )
                     }
                   >
                     <FormControlLabel
@@ -333,7 +353,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                                   variant="body2"
                                   color="text.secondary"
                                 >
-                                  Rs. {subject.fee}
+                                  Rs. {formatNumber(subject.fee)}
                                 </Typography>
                               </Box>
                             }
@@ -365,25 +385,149 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
 
               {/* Summary */}
               {step === "summary" && (
-                <>
-                  <Typography variant="h6" gutterBottom>
-                    Summary
-                  </Typography>
-                  {details.map((d, idx) => (
-                    <Box key={idx} mb={2}>
-                      <Typography>
-                        <strong>Sibling {idx + 1}</strong>: Grade {d.grade},{" "}
-                        {d.mode}, {d.subjectType === "all"
-                          ? "All Subjects"
-                          : d.subjects.join(", ")}
-                      </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    maxHeight: "65vh",
+                  }}
+                >
+                  {/* Top Section: Total Fee + Discount */}
+                  <Box sx={{ mb: 2 }}>
+                    {/* Total Fee */}
+                    <Box
+                      sx={{
+                        textAlign: "center",
+                        backgroundColor: "primary.main",
+                        color: "primary.contrastText",
+                        py: 2,
+                        borderRadius: 2,
+                        fontWeight: "bold",
+                        fontSize: "1.7rem",
+                        mb: 1,
+                      }}
+                    >
+                      Total Fee: Rs.{" "}
+                      {calculateTotalFee(
+                        details,
+                        feeStructures
+                      ).toLocaleString()}
                     </Box>
-                  ))}
-                  <Typography variant="h6" sx={{ mt: 2 }}>
-                    Total Fee: Rs. {calculateTotalFee(details, feeStructures)}
-                  </Typography>
 
-                  <Box display="flex" justifyContent="space-between" mt={2}>
+                    {/* Discount */}
+                    {siblings > 1 &&
+                      (() => {
+                        const baseTotal = details.reduce((sum, d) => {
+                          const fs = feeStructures.find(
+                            (f) => f.grades === d.grade
+                          );
+                          if (!fs) return sum;
+
+                          if (d.subjectType === "all") {
+                            const allFee = fs.subjects_with_fee.find(
+                              (s) => s.name === "All"
+                            );
+                            return sum + (allFee?.fee || 0);
+                          } else {
+                            return (
+                              sum +
+                              d.subjects.reduce((s, subj) => {
+                                const sub = fs.subjects_with_fee.find(
+                                  (sf) => sf.name === subj
+                                );
+                                return s + (sub?.fee || 0);
+                              }, 0)
+                            );
+                          }
+                        }, 0);
+
+                        const discountPercent =
+                          siblings === 2
+                            ? 20
+                            : siblings === 3
+                            ? 30
+                            : siblings >= 4
+                            ? 35
+                            : 0;
+
+                        const discountedTotal = calculateTotalFee(
+                          details,
+                          feeStructures
+                        );
+                        const discountAmount = baseTotal - discountedTotal;
+
+                        // round discount to nearest 500
+                        const roundedDiscount =
+                          Math.round(discountAmount / 500) * 500;
+
+                        return (
+                          <Typography
+                            variant="subtitle1"
+                            align="center"
+                            sx={{
+                              color: "red",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Siblings Discount Applied: {discountPercent}% <br />
+                            You Saved: ≈ Rs. {roundedDiscount.toLocaleString()}
+                          </Typography>
+                        );
+                      })()}
+                  </Box>
+
+                  {/* Scrollable Sibling Details */}
+                  <Box
+                    sx={{
+                      flexGrow: 1,
+                      overflowY: "auto",
+                      pr: 1,
+                      mb: 2,
+                    }}
+                  >
+                    {details.map((d, idx) => (
+                      <Box key={idx} mb={2}>
+                        <Typography variant="h6">
+                          <strong>Sibling {idx + 1}</strong>
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Grade:</strong> {d.grade}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Mode:</strong> {d.mode}{" "}
+                          <em>
+                            (
+                            {d.mode === "On Campus" ? (
+                              <>
+                                <strong>1 x </strong> Fee Charges
+                              </>
+                            ) : d.mode === "Online" ? (
+                              <>
+                                <strong>2 x </strong> Fee Charges
+                              </>
+                            ) : (
+                              <>
+                                <strong>3 x </strong> Fee Charges
+                              </>
+                            )}
+                            )
+                          </em>
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Subjects:</strong>{" "}
+                          {d.subjectType === "all"
+                            ? "All Subjects"
+                            : d.subjects.join(", ")}
+                        </Typography>
+
+                        {idx < details.length - 1 && <Divider sx={{ my: 2 }} />}
+                      </Box>
+                    ))}
+                  </Box>
+
+                  {/* Buttons */}
+                  <Box display="flex" justifyContent="space-between" mt={1}>
                     <Button variant="outlined" onClick={handleBack}>
                       Back
                     </Button>
@@ -391,10 +535,10 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                       Finish
                     </Button>
                   </Box>
-                </>
+                </Box>
               )}
             </Box>
-          </>
+          </Box>
         )}
       </Box>
     </Modal>

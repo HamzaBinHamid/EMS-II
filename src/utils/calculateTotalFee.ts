@@ -1,5 +1,7 @@
 import { FeeStructure, SiblingDetail } from "@/types/feeStructure";
 
+// types/feeStructure.ts already has FeeStructure + SiblingDetail
+
 export function calculateTotalFee(
   details: SiblingDetail[],
   feeStructures: FeeStructure[]
@@ -15,10 +17,10 @@ export function calculateTotalFee(
     let siblingFee = 0;
 
     if (sibling.subjectType === "all") {
-      siblingFee = feeStructure.subjects_with_fee.reduce(
-        (sum, subj) => sum + subj.fee,
-        0
+      const allSubject = feeStructure.subjects_with_fee.find(
+        (s) => s.name === "All"
       );
+      siblingFee = allSubject ? allSubject.fee : 0;
     } else if (sibling.subjectType === "selective") {
       siblingFee = feeStructure.subjects_with_fee
         .filter((s) => sibling.subjects.includes(s.name))
@@ -44,5 +46,13 @@ export function calculateTotalFee(
     totalFee = totalFee - totalFee * discount;
   }
 
+  // Round to nearest 500
+  totalFee = Math.round(totalFee / 500) * 500;
+
   return totalFee;
+}
+
+// 👉 Utility for commas in numbers
+export function formatNumber(num: number): string {
+  return num.toLocaleString("en-PK"); // e.g. 1,234,500
 }
