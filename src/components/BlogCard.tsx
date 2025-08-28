@@ -5,12 +5,16 @@ import { getImageUrl } from "@/lib/getImageUrl";
 import { styled } from "@mui/material/styles";
 import CustomButton from "./CustomButton";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import FeeStructureModal from "./FeeStructureModal"; // 👈 Import modal
+import { useRouter } from "next/router";
+import FeeStructureModal from "./FeeStructureModal";
+import AdmissionFormModal from "./AdmissionFormModal"; // ✅ Import Admission Form Modal
 
 interface BlogCardProps {
   imageFileName: string;
   alt?: string;
   buttonText?: string;
+  navigateTo?: string;
+  openModal?: string;
 }
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -22,7 +26,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
-  cursor: "pointer", // 👈 shows it's clickable
+  cursor: "pointer",
   "&:hover": {
     transform: "translateY(-8px)",
     boxShadow: theme.shadows[10],
@@ -36,7 +40,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
   imageFileName,
   alt = "Blog image",
   buttonText = "Read more",
+  navigateTo,
+  openModal,
 }) => {
+  const router = useRouter();
   const [imgSrc, setImgSrc] = useState<string>(() => {
     try {
       return getImageUrl(imageFileName);
@@ -48,9 +55,17 @@ const BlogCard: React.FC<BlogCardProps> = ({
 
   const [open, setOpen] = useState(false);
 
+  const handleClick = () => {
+    if (openModal) {
+      setOpen(true); // open modal dynamically
+    } else if (navigateTo) {
+      router.push(navigateTo);
+    }
+  };
+
   return (
     <>
-      <StyledCard onClick={() => setOpen(true)}>
+      <StyledCard onClick={handleClick}>
         {/* Image */}
         <Box
           sx={(theme) => ({
@@ -67,9 +82,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
             src={imgSrc}
             alt={alt}
             fill
-            style={{
-              objectFit: "cover",
-            }}
+            style={{ objectFit: "cover" }}
             sizes="(max-width: 600px) 100vw, 500px"
             priority
             onError={() => setImgSrc("/fallback.jpg")}
@@ -80,8 +93,8 @@ const BlogCard: React.FC<BlogCardProps> = ({
         <CardActions sx={{ justifyContent: "center", p: 3 }}>
           <CustomButton
             onClick={(e) => {
-              e.stopPropagation(); // 👈 prevent card click bubbling
-              setOpen(true);
+              e.stopPropagation();
+              handleClick();
             }}
             sx={{
               background: (theme) =>
@@ -92,8 +105,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
               borderRadius: "30px",
               fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               padding: { xs: "6px 16px", sm: "8px 20px", md: "10px 26px" },
-              boxShadow: (theme) =>
-                `0 4px 10px ${theme.palette.primary.main}40`,
+              boxShadow: (theme) => `0 4px 10px ${theme.palette.primary.main}40`,
               transition: "all 0.3s ease",
               "&:hover": {
                 background: (theme) =>
@@ -115,14 +127,22 @@ const BlogCard: React.FC<BlogCardProps> = ({
         </CardActions>
       </StyledCard>
 
-      {/* Modal */}
-      <FeeStructureModal
-        open={open}
-        onClose={() => setOpen(false)}
-        instituteName="Some Institute" // 👈 pass a real name here
-        feeStructures={[]} // 👈 or fetch from your backend
-        onSave={(data) => console.log("Saved:", data)}
-      />
+      {/* Conditional Modals */}
+      {openModal === "feeStructure" && (
+        <FeeStructureModal
+          open={open}
+          onClose={() => setOpen(false)}
+          feeStructures={[]} // TODO: pass actual data if needed
+          onSave={(data) => console.log("Saved:", data)}
+        />
+      )}
+
+      {openModal === "admissionForm" && (
+        <AdmissionFormModal
+          open={open}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </>
   );
 };

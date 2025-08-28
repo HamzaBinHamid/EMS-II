@@ -1,3 +1,4 @@
+//src/types/feeStructure.ts
 export interface SubjectWithFee {
   name: string;
   fee: number;

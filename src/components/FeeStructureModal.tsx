@@ -414,7 +414,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                       }
                     >
                       {currentSibling + 1 === siblings
-                        ? "Check Fee →"
+                        ? "Check Fee"
                         : "Next Sibling"}
                     </Button>
                   </Box>
@@ -464,7 +464,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                         }
                         label={
                           <span>
-                            On Campus (AC charges) <strong>Rs. 1,000 -/ sibling</strong>
+                            AC charges <strong>Rs. 1,000 -/ sibling</strong>
                           </span>
                         }
                         sx={{
@@ -492,8 +492,8 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                         }
                         label={
                           <span>
-                            Deserving Students{" "}
-                            <strong>20% Discount</strong>
+                            Scholarship / Deserving Students{" "}
+                            {/* <strong>20% Discount</strong> */}
                           </span>
                         }
                         sx={{

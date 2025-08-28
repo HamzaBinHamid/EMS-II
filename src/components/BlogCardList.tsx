@@ -2,18 +2,36 @@ import React from "react";
 import BlogCard from "@/components/BlogCard";
 import { Box, Typography } from "@mui/material";
 
+// Define card data type
 interface CardData {
   imageFileName: string;
   buttonText?: string;
-  navigateTo?: string; // 👈 added
+  navigateTo?: string;
+  openModal?: string; // allow modal option
 }
 
 const BlogCardList: React.FC = () => {
   const cards: CardData[] = [
-    { imageFileName: "fee.png", buttonText: "Fee Structure", navigateTo: "/features/FeePage" },
-    { imageFileName: "fee.png", buttonText: "Explore Now", navigateTo: "/features/ExplorePage" },
-    { imageFileName: "fee.png", buttonText: "See Details", navigateTo: "/features/DetailsPage" },
-    { imageFileName: "fee.png", buttonText: "View Info", navigateTo: "/features/InfoPage" },
+    {
+      imageFileName: "fee.png",
+      buttonText: "Fee Structure",
+      openModal: "feeStructure",
+    },
+    {
+      imageFileName: "admission.png",
+      buttonText: "Apply Online",
+    openModal: "admissionForm",
+    },
+    {
+      imageFileName: "fee.png",
+      buttonText: "See Details",
+      navigateTo: "/features/DetailsPage",
+    },
+    {
+      imageFileName: "fee.png",
+      buttonText: "View Info",
+      navigateTo: "/features/InfoPage",
+    },
   ];
 
   if (!cards || cards.length === 0) {
@@ -47,7 +65,8 @@ const BlogCardList: React.FC = () => {
           key={`card-${index}`}
           imageFileName={card.imageFileName}
           buttonText={card.buttonText}
-          navigateTo={card.navigateTo} // 👈 Pass dynamic route
+          navigateTo={card.navigateTo}
+          openModal={card.openModal}
         />
       ))}
     </Box>
