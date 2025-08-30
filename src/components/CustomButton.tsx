@@ -3,7 +3,7 @@ import { FC, memo, useCallback } from "react";
 
 interface CustomButtonProps extends ButtonProps {
   children: React.ReactNode;
-  loading?: boolean;
+  loading?: boolean | null; // Allow null to match ButtonProps
 }
 
 const CustomButton: FC<CustomButtonProps> = memo(({ children, sx, loading = false, disabled, onClick, ...props }) => {
@@ -20,7 +20,7 @@ const CustomButton: FC<CustomButtonProps> = memo(({ children, sx, loading = fals
   }, [isSm, isMd, isLg]);
 
   const getPadding = useCallback(() => {
-    if (isLg) return "8px 20px"; // Reduced padding
+    if (isLg) return "8px 20px";
     if (isMd) return "6px 16px";
     if (isSm) return "5px 14px";
     return "4px 12px";
@@ -42,8 +42,8 @@ const CustomButton: FC<CustomButtonProps> = memo(({ children, sx, loading = fals
   return (
     <Button
       color="inherit"
-      variant="contained" // Use Material-UI contained variant for a polished look
-      disabled={disabled || loading}
+      variant="contained"
+      disabled={disabled || loading === true} // Treat null as false
       onClick={handleClick}
       sx={{
         textTransform: "none",
@@ -51,19 +51,19 @@ const CustomButton: FC<CustomButtonProps> = memo(({ children, sx, loading = fals
         fontSize: getFontSize(),
         padding: getPadding(),
         minWidth: { xs: 80, sm: 100 },
-        borderRadius: 1, // Slightly rounded corners
+        borderRadius: 1,
         transition: theme.transitions.create(["background-color", "color", "transform", "box-shadow"], {
-          duration: theme.transitions.duration.short, // Faster transition: 200ms
+          duration: theme.transitions.duration.short,
           easing: theme.transitions.easing.easeInOut,
         }),
         "&:hover": {
-          backgroundColor: disabled || loading ? undefined : theme.palette.primary.dark,
-          color: disabled || loading ? undefined : theme.palette.primary.contrastText,
-          transform: disabled || loading ? "none" : "scale(1.05)",
-          boxShadow: disabled || loading ? "none" : theme.shadows[4],
+          backgroundColor: disabled || loading === true ? undefined : theme.palette.primary.dark,
+          color: disabled || loading === true ? undefined : theme.palette.primary.contrastText,
+          transform: disabled || loading === true ? "none" : "scale(1.05)",
+          boxShadow: disabled || loading === true ? "none" : theme.shadows[4],
         },
         "&:active": {
-          transform: disabled || loading ? "none" : "scale(0.98)",
+          transform: disabled || loading === true ? "none" : "scale(0.98)",
         },
         position: "relative",
         overflow: "hidden",
@@ -78,7 +78,7 @@ const CustomButton: FC<CustomButtonProps> = memo(({ children, sx, loading = fals
       role="button"
       {...props}
     >
-      {loading ? (
+      {loading === true ? (
         <Box
           component="span"
           sx={{

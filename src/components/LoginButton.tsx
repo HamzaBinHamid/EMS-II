@@ -31,6 +31,7 @@ const LoginButton: FC<LoginButtonProps> = ({ loginPageUrl = "/login", ...props }
           variant="text"
           aria-label="Log in to your account"
           role="button"
+          loading={false} // Explicitly set loading to false
           sx={{
             fontSize: { xs: "0.75rem", sm: "0.875rem" },
             padding: { xs: "2px 6px", sm: "3px 8px" },
