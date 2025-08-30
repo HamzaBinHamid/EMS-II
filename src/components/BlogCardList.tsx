@@ -22,16 +22,6 @@ const BlogCardList: React.FC = () => {
       buttonText: "Apply Online",
     openModal: "admissionForm",
     },
-    {
-      imageFileName: "fee.png",
-      buttonText: "See Details",
-      navigateTo: "/features/DetailsPage",
-    },
-    {
-      imageFileName: "fee.png",
-      buttonText: "View Info",
-      navigateTo: "/features/InfoPage",
-    },
   ];
 
   if (!cards || cards.length === 0) {

@@ -52,9 +52,10 @@ export function calculateTotalFee(
   if (!skipSiblingDiscount) {
     const siblingCount = details.length;
     let discount = 0;
-    if (siblingCount === 2) discount = 0.2;
-    else if (siblingCount === 3) discount = 0.3;
-    else if (siblingCount >= 4) discount = 0.35;
+
+    if (siblingCount >= 2) {
+      discount = 0.2;
+    }
 
     if (discount > 0) {
       totalFee = totalFee - totalFee * discount;

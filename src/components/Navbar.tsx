@@ -23,9 +23,14 @@ import { getLogoUrl } from "@/lib/getImageUrl";
 import LoginButton from "@/components/LoginButton";
 import LogoutButton from "@/components/LogoutButton";
 import { useAuth } from "@/context/AuthContext";
+import AdmissionFormModal from "./AdmissionFormModal";
+import FeeStructureModal from "./FeeStructureModal";
 
 export default function Navbar() {
+  const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
+  const [isFeeModalOpen, setIsFeeModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const logoUrl = getLogoUrl();
@@ -49,13 +54,19 @@ export default function Navbar() {
     }
   };
 
-  const navItems: { label: string; href: string }[] = [
+  const navItems: { label: string; href: string; onClick?: () => void }[] = [
     { label: "Home", href: "/" },
-    { label: "Fee Structure", href: "/features/FeePage" },
-    { label: "Our Teachers", href: "/our-teachers" },
-    { label: "Courses", href: "/courses" },
-    { label: "Contacts", href: "/contacts" },
-    { label: "Portal", href: getPortalPath() }, // New dynamic portal link
+    {
+      label: "Fee Structure",
+      href: "#",
+      onClick: () => setIsFeeModalOpen(true),
+    },
+    {
+      label: "Apply Online",
+      href: "#",
+      onClick: () => setIsAdmissionModalOpen(true),
+    },
+    { label: "Portal", href: getPortalPath() },
   ];
 
   // Close drawer on route change
@@ -68,6 +79,14 @@ export default function Navbar() {
       router.events.off("routeChangeStart", handleRouteChange);
     };
   }, [router]);
+
+  // Handle navigation item clicks
+  const handleNavItemClick = (item: typeof navItems[0]) => {
+    if (item.onClick) {
+      item.onClick();
+      setMobileMenuOpen(false); // Close mobile menu when clicking modal items
+    }
+  };
 
   return (
     <>
@@ -156,10 +175,44 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           {!isMobile && (
             <Box sx={{ display: "flex", gap: 2 }}>
-              {navItems.map(({ label, href }) => {
-                const isActive = router.pathname === href;
-                return (
-                  <Link key={label} href={href} passHref legacyBehavior>
+              {navItems.map((item) => {
+                const isActive = router.pathname === item.href;
+                return item.onClick ? (
+                  // Items with onClick (modals)
+                  <Button
+                    key={item.label}
+                    color="inherit"
+                    onClick={() => handleNavItemClick(item)}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: isActive ? 700 : 500,
+                      fontSize: isActive ? "1.05rem" : "1rem",
+                      color: isActive
+                        ? theme.palette.common.white
+                        : "inherit",
+                      backgroundColor: isActive
+                        ? theme.palette.primary.main
+                        : "transparent",
+                      borderRadius: 1,
+                      px: 2,
+                      py: 1,
+                      "&:hover": {
+                        backgroundColor: isActive
+                          ? theme.palette.primary.dark
+                          : theme.palette.action.hover,
+                        color: theme.palette.primary.main,
+                        transform: "scale(1.05)",
+                      },
+                      "&:active": {
+                        transform: "scale(0.95)",
+                      },
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                ) : (
+                  // Regular link items
+                  <Link key={item.label} href={item.href} passHref legacyBehavior>
                     <Button
                       color="inherit"
                       sx={{
@@ -187,7 +240,7 @@ export default function Navbar() {
                         },
                       }}
                     >
-                      {label}
+                      {item.label}
                     </Button>
                   </Link>
                 );
@@ -229,37 +282,60 @@ export default function Navbar() {
           </Box>
 
           <List>
-            {navItems.map(({ label, href }) => (
-              <ListItem disablePadding key={label}>
-                <Link href={href} passHref legacyBehavior>
+            {navItems.map((item) => (
+              <ListItem disablePadding key={item.label}>
+                {item.onClick ? (
+                  // Items with onClick (modals)
                   <ListItemButton
+                    onClick={() => handleNavItemClick(item)}
                     sx={{
-                      bgcolor:
-                        router.pathname === href
-                          ? theme.palette.primary.main
-                          : "transparent",
-                      color:
-                        router.pathname === href
-                          ? theme.palette.common.white
-                          : "inherit",
+                      color: "inherit",
                       "&:hover": {
-                        backgroundColor:
-                          router.pathname === href
-                            ? theme.palette.primary.dark
-                            : theme.palette.action.hover,
+                        backgroundColor: theme.palette.action.hover,
                         color: theme.palette.primary.main,
                       },
                     }}
                   >
                     <ListItemText
-                      primary={label}
+                      primary={item.label}
                       primaryTypographyProps={{
-                        fontWeight: router.pathname === href ? 700 : 500,
-                        fontSize: router.pathname === href ? "1.05rem" : "1rem",
+                        fontWeight: 500,
+                        fontSize: "1rem",
                       }}
                     />
                   </ListItemButton>
-                </Link>
+                ) : (
+                  // Regular link items
+                  <Link href={item.href} passHref legacyBehavior>
+                    <ListItemButton
+                      sx={{
+                        bgcolor:
+                          router.pathname === item.href
+                            ? theme.palette.primary.main
+                            : "transparent",
+                        color:
+                          router.pathname === item.href
+                            ? theme.palette.common.white
+                            : "inherit",
+                        "&:hover": {
+                          backgroundColor:
+                            router.pathname === item.href
+                              ? theme.palette.primary.dark
+                              : theme.palette.action.hover,
+                          color: theme.palette.primary.main,
+                        },
+                      }}
+                    >
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{
+                          fontWeight: router.pathname === item.href ? 700 : 500,
+                          fontSize: router.pathname === item.href ? "1.05rem" : "1rem",
+                        }}
+                      />
+                    </ListItemButton>
+                  </Link>
+                )}
               </ListItem>
             ))}
           </List>
@@ -288,6 +364,22 @@ export default function Navbar() {
           )}
         </Box>
       </Drawer>
+
+      {/* Modals */}
+      <AdmissionFormModal
+        open={isAdmissionModalOpen}
+        onClose={() => setIsAdmissionModalOpen(false)}
+      />
+      
+      <FeeStructureModal
+        open={isFeeModalOpen}
+        onClose={() => setIsFeeModalOpen(false)}
+        onSave={(data) => {
+          // Handle fee structure data saving
+          console.log('Fee structure data:', data);
+          setIsFeeModalOpen(false);
+        }}
+      />
     </>
   );
 }

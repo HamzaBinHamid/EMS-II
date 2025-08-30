@@ -27,7 +27,7 @@ import { calculateTotalFee, formatNumber } from "@/utils/calculateTotalFee";
 interface FeeStructureModalProps {
   open: boolean;
   onClose: () => void;
-  feeStructures: FeeStructure[];
+  feeStructures?: FeeStructure[]; // Make it optional with `?`
   onSave?: (data: {
     siblings: number;
     details: SiblingDetail[];
