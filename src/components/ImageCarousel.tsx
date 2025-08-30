@@ -2,7 +2,21 @@ import React, { useRef, useState } from "react";
 import Slider from "react-slick";
 import { Box, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-import { carousel1, carousel2, carousel4, carousel5 } from "@/lib/getImageUrl";
+import {
+  carousel1,
+  carousel2,
+  carousel4,
+  carousel5,
+  t1,
+  t2,
+  t3,
+  t4,
+  t5,
+  t6,
+  t7,
+  t8,
+  t9,
+} from "@/lib/getImageUrl";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -12,13 +26,22 @@ type SliderType = typeof Slider;
 
 const images = [
   { url: carousel4(), alt: "Love to Learn" },
+  { url: t1(), alt: "Teachers" },
+  { url: t2(), alt: "Teachers" },
+  { url: t3(), alt: "Teachers" },
+  { url: t4(), alt: "Teachers" },
+  { url: t5(), alt: "Teachers" },
+  { url: t6(), alt: "Teachers" },
+  { url: t7(), alt: "Teachers" },
+  { url: t8(), alt: "Teachers" },
+  { url: t9(), alt: "Teachers" },
   { url: carousel2(), alt: "Books" },
   { url: carousel5(), alt: "Library" },
   { url: carousel1(), alt: "Teach" },
 ];
 
 const IMAGE_HEIGHT = 400;
-const IMAGE_HEIGHT_MOBILE = 200;
+const IMAGE_HEIGHT_MOBILE = 350;
 
 const Arrow = ({
   onClick,
