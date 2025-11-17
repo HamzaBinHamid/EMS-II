@@ -13,12 +13,12 @@ interface CardData {
 const BlogCardList: React.FC = () => {
   const cards: CardData[] = [
     {
-      imageFileName: "fee.png",
+      imageFileName: "fee1.png",
       buttonText: "Fee Structure",
       openModal: "feeStructure",
     },
     {
-      imageFileName: "admission.png",
+      imageFileName: "admission1.png",
       buttonText: "Apply Online",
     openModal: "admissionForm",
     },

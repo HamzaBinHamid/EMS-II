@@ -316,7 +316,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                     value={details[currentSibling]?.mode || ""}
                     onChange={(e) => handleModeChange(e.target.value)}
                   >
-                    {["On Campus", "Online", "Home Tuition"].map((option) => (
+                    {["On Campus", "Individual Focus / Online", "Home Tuition"].map((option) => (
                       <FormControlLabel
                         key={option}
                         value={option}
@@ -530,7 +530,7 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                               <>
                                 <strong>1 x </strong> Fee Charges
                               </>
-                            ) : d.mode === "Online" ? (
+                            ) : d.mode === "Individual Focus / Online" ? (
                               <>
                                 <strong>2 x </strong> Fee Charges
                               </>

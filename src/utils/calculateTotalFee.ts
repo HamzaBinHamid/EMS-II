@@ -43,7 +43,7 @@ export function calculateTotalFee(
     }
 
     if (sibling.mode === "On Campus") siblingFee *= 1;
-    else if (sibling.mode === "Online") siblingFee *= 2;
+    else if (sibling.mode === "Individual Focus / Online") siblingFee *= 2;
     else if (sibling.mode === "Home Tuition") siblingFee *= 3;
 
     totalFee += siblingFee;

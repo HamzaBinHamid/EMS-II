@@ -18,18 +18,17 @@ export const getLogoUrl = (): string => getImageUrl("logo4.png");
 /**
  * Gets the public URL of the Python course image (python.jpeg).
  */
-export const carousel1 = (): string => getImageUrl("carousel1.jpg");
-export const carousel2 = (): string => getImageUrl("carousel2.jpg");
-export const carousel4 = (): string => getImageUrl("carousel4.jpg");
-export const carousel5 = (): string => getImageUrl("carousel5.jpg");
-export const fee = (): string => getImageUrl("fee.png");
-export const admission = (): string => getImageUrl("admission.png");
-export const t1 = (): string => getImageUrl("t1.png");
-export const t2 = (): string => getImageUrl("t2.png");
-export const t3 = (): string => getImageUrl("t3.png");
-export const t4 = (): string => getImageUrl("t4.png");
-export const t5 = (): string => getImageUrl("t5.png");
-export const t6 = (): string => getImageUrl("t6.png");
-export const t7 = (): string => getImageUrl("t7.png");
-export const t8 = (): string => getImageUrl("t8.png");
-export const t9 = (): string => getImageUrl("t9.png");
+export const ourteachers2 = (): string => getImageUrl("ourteachers2.png");
+export const fee1 = (): string => getImageUrl("fee1.png");
+export const admission1 = (): string => getImageUrl("admission1.png");
+export const hamza1 = (): string => getImageUrl("hamza1.png");
+export const iqra1 = (): string => getImageUrl("iqra1.png");
+export const marwa1 = (): string => getImageUrl("marwa1.png");
+export const bakhtawar1 = (): string => getImageUrl("bakhtawar1.png");
+export const abdullah1 = (): string => getImageUrl("abdullah1.png");
+export const mujahid1 = (): string => getImageUrl("mujahid1.png");
+export const hafsa1 = (): string => getImageUrl("hafsa1.png");
+export const safia1 = (): string => getImageUrl("safia1.png");
+export const mahnoor1 = (): string => getImageUrl("mahnoor1.png");
+export const kalsoom1 = (): string => getImageUrl("kalsoom1.png");
+export const aqsa1 = (): string => getImageUrl("aqsa1.png");

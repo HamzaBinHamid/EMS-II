@@ -3,19 +3,18 @@ import Slider from "react-slick";
 import { Box, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import {
-  carousel1,
-  carousel2,
-  carousel4,
-  carousel5,
-  t1,
-  t2,
-  t3,
-  t4,
-  t5,
-  t6,
-  t7,
-  t8,
-  t9,
+  ourteachers2,
+  hamza1,
+  iqra1,
+  marwa1,
+  bakhtawar1,
+  abdullah1,
+  mujahid1,
+  hafsa1,
+  safia1,
+  mahnoor1,
+  kalsoom1,
+  aqsa1,
 } from "@/lib/getImageUrl";
 
 import "slick-carousel/slick/slick.css";
@@ -25,19 +24,18 @@ import "slick-carousel/slick/slick-theme.css";
 type SliderType = typeof Slider;
 
 const images = [
-  { url: carousel4(), alt: "Love to Learn" },
-  { url: t1(), alt: "Teachers" },
-  { url: t2(), alt: "Teachers" },
-  { url: t3(), alt: "Teachers" },
-  { url: t4(), alt: "Teachers" },
-  { url: t5(), alt: "Teachers" },
-  { url: t6(), alt: "Teachers" },
-  { url: t7(), alt: "Teachers" },
-  { url: t8(), alt: "Teachers" },
-  { url: t9(), alt: "Teachers" },
-  { url: carousel2(), alt: "Books" },
-  { url: carousel5(), alt: "Library" },
-  { url: carousel1(), alt: "Teach" },
+  { url: ourteachers2(), alt: "Our Teachers" },
+  { url: hamza1(), alt: "Teachers" },
+  { url: iqra1(), alt: "Teachers" },
+  { url: marwa1(), alt: "Teachers" },
+  { url: bakhtawar1(), alt: "Teachers" },
+  { url: abdullah1(), alt: "Teachers" },
+  { url: mujahid1(), alt: "Teachers" },
+  { url: hafsa1(), alt: "Teachers" },
+  { url: safia1(), alt: "Teachers" },
+  { url: mahnoor1(), alt: "Teachers" },
+  { url: kalsoom1(), alt: "Teachers" },
+  { url: aqsa1(), alt: "Teachers" },
 ];
 
 const IMAGE_HEIGHT = 400;

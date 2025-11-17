@@ -3,7 +3,7 @@ import { Box, Container, useTheme, useMediaQuery } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { ImageCarousel, Navbar, PageLoader } from "@/components";
-import { carousel1, carousel2, carousel4, carousel5 } from "@/lib/getImageUrl";
+import { ourteachers2 } from "@/lib/getImageUrl";
 import BlogCardList from "@/components/BlogCardList";
 import Footer from "@/components/Footer";
 
@@ -29,7 +29,7 @@ const Home = memo(() => {
 
   // Preload carousel images for faster rendering
   useEffect(() => {
-    const images = [carousel1(), carousel2(), carousel4(), carousel5()];
+    const images = [ourteachers2()];
     images.forEach((src) => {
       const img = new Image();
       img.src = src;
