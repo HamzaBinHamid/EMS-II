@@ -6,7 +6,6 @@ import {
   ourteachers2,
   hamza1,
   iqra1,
-  marwa1,
   bakhtawar1,
   abdullah1,
   mujahid1,
@@ -14,7 +13,6 @@ import {
   safia1,
   mahnoor1,
   kalsoom1,
-  aqsa1,
 } from "@/lib/getImageUrl";
 
 import "slick-carousel/slick/slick.css";
@@ -27,7 +25,6 @@ const images = [
   { url: ourteachers2(), alt: "Our Teachers" },
   { url: hamza1(), alt: "Teachers" },
   { url: iqra1(), alt: "Teachers" },
-  { url: marwa1(), alt: "Teachers" },
   { url: bakhtawar1(), alt: "Teachers" },
   { url: abdullah1(), alt: "Teachers" },
   { url: mujahid1(), alt: "Teachers" },
@@ -35,7 +32,6 @@ const images = [
   { url: safia1(), alt: "Teachers" },
   { url: mahnoor1(), alt: "Teachers" },
   { url: kalsoom1(), alt: "Teachers" },
-  { url: aqsa1(), alt: "Teachers" },
 ];
 
 const IMAGE_HEIGHT = 400;
@@ -91,7 +87,7 @@ const ImageCarousel = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 4000,
+    autoplaySpeed: 2500,
     arrows: false,
     pauseOnHover: true,
     beforeChange: (_: number, next: number) => setCurrentSlide(next),

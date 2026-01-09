@@ -23,6 +23,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import supabase from "@/lib/supabase";
 import { FeeStructure, SiblingDetail } from "@/types/feeStructure";
 import { calculateTotalFee, formatNumber } from "@/utils/calculateTotalFee";
+import theme from "@/ui/theme";
 
 interface FeeStructureModalProps {
   open: boolean;
@@ -252,7 +253,21 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                   key={num}
                   value={num.toString()}
                   control={<Radio />}
-                  label={`${num} Sibling${num > 1 ? "s" : ""}`}
+                  label={
+                    <>
+                      {num} Sibling{num > 1 ? "s " : " "}
+                      {num > 1 && (
+                        <span
+                          style={{
+                            color: theme.palette.secondary.main,
+                            fontWeight: 700,
+                          }}
+                        >
+                          (20% Discounted)
+                        </span>
+                      )}
+                    </>
+                  }
                 />
               ))}
             </RadioGroup>
@@ -316,7 +331,11 @@ const FeeStructureModal: React.FC<FeeStructureModalProps> = ({
                     value={details[currentSibling]?.mode || ""}
                     onChange={(e) => handleModeChange(e.target.value)}
                   >
-                    {["On Campus", "Individual Focus / Online", "Home Tuition"].map((option) => (
+                    {[
+                      "On Campus",
+                      "Individual Focus / Online",
+                      "Home Tuition",
+                    ].map((option) => (
                       <FormControlLabel
                         key={option}
                         value={option}
