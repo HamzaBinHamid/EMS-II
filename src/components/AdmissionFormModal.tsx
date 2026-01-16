@@ -40,8 +40,17 @@ export default function AdmissionFormModal({
     formState: { errors },
   } = useForm<AdmissionFormData>({
     defaultValues: {
-      siblingsCount: 0,
-      students: [],
+      siblingsCount: 1, // 👈 default to 1
+      students: [
+        {
+          name: "",
+          cnic: "",
+          gender: "",
+          grade: "",
+          schoolCollege: "",
+          subjects: "All",
+        },
+      ],
       fatherName: "",
       parentContact: "",
       homeAddress: "",
@@ -60,12 +69,8 @@ export default function AdmissionFormModal({
   } | null>(null);
 
   const updateSiblings = (count: number) => {
-    if (count === 0) {
-      replace([]);
-      setValue("siblingsCount", 0);
-      return;
-    }
     const current = fields;
+
     const newFields = Array.from({ length: count }).map(
       (_, i) =>
         current[i] || {
@@ -77,6 +82,7 @@ export default function AdmissionFormModal({
           subjects: "All",
         }
     );
+
     replace(newFields);
     setValue("siblingsCount", count);
   };
@@ -130,7 +136,7 @@ export default function AdmissionFormModal({
             value={siblingsCount}
             onChange={(e) => updateSiblings(parseInt(e.target.value))}
           >
-            {[0, 1, 2, 3, 4].map((num) => (
+            {[1, 2, 3, 4].map((num) => (
               <FormControlLabel
                 key={num}
                 value={num}
@@ -197,8 +203,16 @@ export default function AdmissionFormModal({
                 render={({ field }) => (
                   <>
                     <RadioGroup row {...field}>
-                      <FormControlLabel value="Male" control={<Radio />} label="Male" />
-                      <FormControlLabel value="Female" control={<Radio />} label="Female" />
+                      <FormControlLabel
+                        value="Male"
+                        control={<Radio />}
+                        label="Male"
+                      />
+                      <FormControlLabel
+                        value="Female"
+                        control={<Radio />}
+                        label="Female"
+                      />
                     </RadioGroup>
                     {errors.students?.[index]?.gender && (
                       <Typography variant="caption" color="error">
@@ -238,7 +252,9 @@ export default function AdmissionFormModal({
                     fullWidth
                     margin="normal"
                     error={!!errors.students?.[index]?.schoolCollege}
-                    helperText={errors.students?.[index]?.schoolCollege?.message}
+                    helperText={
+                      errors.students?.[index]?.schoolCollege?.message
+                    }
                   />
                 )}
               />
@@ -258,7 +274,11 @@ export default function AdmissionFormModal({
                       value={field.value || "All"}
                       onChange={(e) => field.onChange(e.target.value)}
                     >
-                      <FormControlLabel value="All" control={<Radio />} label="All" />
+                      <FormControlLabel
+                        value="All"
+                        control={<Radio />}
+                        label="All"
+                      />
                       <FormControlLabel
                         value="Selective"
                         control={<Radio />}
@@ -266,17 +286,21 @@ export default function AdmissionFormModal({
                       />
                     </RadioGroup>
 
-                    {field.value !== "All" && field.value !== "" && field.value !== "Selective" && (
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Enter Subjects"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        error={!!errors.students?.[index]?.subjects}
-                        helperText={errors.students?.[index]?.subjects?.message}
-                      />
-                    )}
+                    {field.value !== "All" &&
+                      field.value !== "" &&
+                      field.value !== "Selective" && (
+                        <TextField
+                          fullWidth
+                          margin="normal"
+                          label="Enter Subjects"
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          error={!!errors.students?.[index]?.subjects}
+                          helperText={
+                            errors.students?.[index]?.subjects?.message
+                          }
+                        />
+                      )}
 
                     {field.value === "Selective" && (
                       <TextField
@@ -359,7 +383,9 @@ export default function AdmissionFormModal({
             <li>Mobile phones are prohibited for junior students.</li>
             <li>Dress appropriately to ensure a respectful environment.</li>
             <li>Maintain courteous behavior with everyone.</li>
-            <li>Students must secure at least 70% marks to continue enrollment.</li>
+            <li>
+              Students must secure at least 70% marks to continue enrollment.
+            </li>
             <li>Cheating results in a zero mark and disciplinary action.</li>
             <li>Security cameras monitor exam rooms for integrity.</li>
           </ul>
@@ -395,7 +421,11 @@ export default function AdmissionFormModal({
             disabled={loading}
             sx={{ borderRadius: 2, fontWeight: 600 }}
           >
-            {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Submit"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
